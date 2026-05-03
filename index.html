@@ -2,146 +2,216 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>待办事项</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>肺栓塞智能决策平台 | 决策支持 & 虚拟仿真</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f0f0f0;
-        }
-        
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        
-        .todo-container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        #todo-input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        
-        button {
-            padding: 8px 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        button:hover {
-            background-color: #45a049;
-        }
-        
-        .todo-list {
-            list-style: none;
+        * {
+            margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
-        
-        .todo-item {
+
+        body {
+            background: linear-gradient(145deg, #eef2f9 0%, #dce5f0 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
             display: flex;
             align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
+            justify-content: center;
+            padding: 2rem;
         }
-        
-        .todo-item.completed span {
-            text-decoration: line-through;
-            color: #888;
+
+        /* 主容器 - 高端医疗科技风格 */
+        .portal-container {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(2px);
+            border-radius: 56px;
+            box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255,255,255,0.5);
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
-        
-        .delete-btn {
-            background-color: #ff4444;
-            margin-left: auto;
-            padding: 4px 8px;
+
+        /* 头部形象区 */
+        .hero-section {
+            background: linear-gradient(135deg, #0b2b3f 0%, #123e56 100%);
+            padding: 2rem 2.5rem 1.8rem;
+            text-align: center;
+            color: white;
         }
-        
-        .delete-btn:hover {
-            background-color: #cc0000;
+        .badge-icon {
+            display: inline-block;
+            background: #2c7da0aa;
+            backdrop-filter: blur(4px);
+            padding: 0.3rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .hero-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.3px;
+        }
+        .hero-section p {
+            font-size: 1rem;
+            opacity: 0.85;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 双卡片按钮区域 */
+        .systems-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            padding: 3rem 2.5rem 3.5rem;
+            justify-content: center;
+            align-items: stretch;
+        }
+
+        .system-card {
+            flex: 1;
+            min-width: 280px;
+            background: #ffffff;
+            border-radius: 32px;
+            box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.12);
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #eef3fc;
+        }
+        .system-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 28px 36px -16px rgba(0, 0, 0, 0.2);
+            border-color: #bdd9f0;
+        }
+
+        .card-header {
+            padding: 1.6rem 1.8rem 1rem;
+            background: #fefefe;
+            border-bottom: 2px solid #eef2f8;
+        }
+        .card-icon {
+            font-size: 2.6rem;
+            margin-bottom: 0.8rem;
+        }
+        .card-title {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: #0a2f44;
+            letter-spacing: -0.2px;
+        }
+        .card-sub {
+            font-size: 0.8rem;
+            color: #5a7b9c;
+            margin-top: 6px;
+        }
+        .card-body {
+            padding: 1rem 1.8rem 1.4rem;
+            flex: 1;
+            color: #2c4c6e;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+        .card-footer-btn {
+            margin: 0.5rem 1.8rem 1.8rem;
+            background: #f0f7fe;
+            padding: 0.8rem;
+            text-align: center;
+            border-radius: 60px;
+            font-weight: 600;
+            color: #1f6392;
+            transition: 0.2s;
+            border: 1px solid #d7e5f5;
+        }
+        .system-card:hover .card-footer-btn {
+            background: #1f6392;
+            color: white;
+            border-color: #1f6392;
+        }
+
+        /* 分割装饰 */
+        .info-footer {
+            background: #f8fafd;
+            padding: 1.2rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #6c86a3;
+            border-top: 1px solid #e2eaf2;
+            letter-spacing: 0.3px;
+        }
+
+        @media (max-width: 780px) {
+            .hero-section h1 { font-size: 1.8rem; }
+            .systems-grid { padding: 2rem 1.5rem; gap: 1.2rem; }
+            .card-title { font-size: 1.4rem; }
+        }
+
+        /* 医学点缀 */
+        .dot-pattern {
+            background-image: radial-gradient(#ffffff20 1.2px, transparent 1.2px);
+            background-size: 24px 24px;
         }
     </style>
 </head>
 <body>
-    <div class="todo-container">
-        <h1>待办事项</h1>
-        <div class="input-group">
-            <input type="text" id="todo-input" placeholder="输入新任务...">
-            <button onclick="addTodo()">添加</button>
-        </div>
-        <ul id="todo-list" class="todo-list"></ul>
+<div class="portal-container">
+    <div class="hero-section">
+        <div class="badge-icon">🏥 国家肺血管病中心 · 智能诊疗平台</div>
+        <h1>肺栓塞综合管理门户</h1>
+        <p>基于2025中国指南 | 临床决策支持 + 交互式虚拟仿真训练</p>
     </div>
 
-    <script>
-        // 获取 DOM 元素
-        const todoInput = document.getElementById('todo-input');
-        const todoList = document.getElementById('todo-list');
+    <div class="systems-grid">
+        <!-- 按钮1: 肺栓塞决策支持系统 链接 pe1.html -->
+        <a href="pe1.html" class="system-card" target="_self" rel="noopener noreferrer">
+            <div class="card-header">
+                <div class="card-icon">🧠📊</div>
+                <div class="card-title">肺栓塞决策支持系统</div>
+                <div class="card-sub">Clinical Decision Support · 指南驱动</div>
+            </div>
+            <div class="card-body">
+                基于2025急性肺栓塞指南构建的智能风险评估、危险分层、抗凝/溶栓推荐及CTEPH随访。辅助医师快速制定个体化方案。
+            </div>
+            <div class="card-footer-btn">
+                🔗 进入决策系统 →
+            </div>
+        </a>
 
-        // 添加任务
-        function addTodo() {
-            const todoText = todoInput.value.trim();
-            
-            if (todoText === '') {
-                alert('请输入任务内容！');
-                return;
-            }
+        <!-- 按钮2: 肺栓塞虚拟仿真系统 链接 pe2.html -->
+        <a href="pe2.html" class="system-card" target="_self" rel="noopener noreferrer">
+            <div class="card-header">
+                <div class="card-icon">🩺🖥️</div>
+                <div class="card-title">肺栓塞虚拟仿真系统</div>
+                <div class="card-sub">Virtual Simulation · 沉浸式教学</div>
+            </div>
+            <div class="card-body">
+                高仿真临床情景模拟：急性肺栓塞急救流程、介入操作模拟、危重症鉴别及PERT多学科协作训练。提升实战能力。
+            </div>
+            <div class="card-footer-btn">
+                🎮 启动仿真训练 →
+            </div>
+        </a>
+    </div>
+    <div class="info-footer">
+        ⚕️ 本系统遵循《急性肺栓塞诊断和治疗指南2025》 | 数据安全加密 | 仅供医疗专业人士使用
+    </div>
+</div>
 
-            const todoItem = document.createElement('li');
-            todoItem.className = 'todo-item';
-            
-            // 创建复选框
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.onclick = function() {
-                todoItem.classList.toggle('completed');
-            };
-            
-            // 创建任务文本
-            const textSpan = document.createElement('span');
-            textSpan.textContent = todoText;
-            textSpan.style.marginLeft = '10px';
-            
-            // 创建删除按钮
-            const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = '删除';
-            deleteBtn.className = 'delete-btn';
-            deleteBtn.onclick = function() {
-                todoList.removeChild(todoItem);
-            };
-            
-            // 组装元素
-            todoItem.appendChild(checkbox);
-            todoItem.appendChild(textSpan);
-            todoItem.appendChild(deleteBtn);
-            todoList.appendChild(todoItem);
-            
-            // 清空输入框
-            todoInput.value = '';
-        }
-
-        // 按回车键添加任务
-        todoInput.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                addTodo();
-            }
-        });
-    </script>
+<!-- 增加简单的路由提示：若pe1或pe2未创建时友好提醒（但正常情况用户会自行放置文件，不报错即可） -->
+<script>
+    // 优雅处理可能缺文件的情况: 在控制台提示不影响使用，点击时浏览器默认导航。
+    // 无需过度干扰，为了让用户明白目标文件需存在，但本页只负责链接跳转
+    console.log("肺栓塞门户已加载 — 请确保 pe1.html 和 pe2.html 与当前页面在同一目录下");
+</script>
 </body>
 </html>
