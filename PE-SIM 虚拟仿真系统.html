@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>急性肺栓塞模拟教学系统 V2.0 - MedExpress</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=JetBrains+Mono&display=swap');
+        
+        :root {
+            --cdc-blue: #002D62;
+            --cdc-red: #B22234;
+            --monitor-bg: #0a0a0a;
+        }
+
+        body { 
+            font-family: 'Noto Sans SC', sans-serif; 
+            background: #eef2f6; 
+            overflow-x: hidden;
+        }
+
+        .monitor-lcd {
+            background-color: var(--monitor-bg);
+            border: 4px solid #333;
+            box-shadow: inset 0 0 15px rgba(0,255,0,0.1);
+        }
+
+        .lcd-text {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .choice-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left-width: 6px;
+        }
+
+        .choice-card:hover {
+            transform: translateX(8px);
+            background-color: #f0f7ff;
+        }
+
+        .lab-report {
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        .animate-blink { animation: blink 1s step-end infinite; }
+
+        /* 评分工具抽屉样式 */
+        #scoring-drawer {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(100%);
+        }
+        #scoring-drawer.open {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="p-2 md:p-6">
+    <div id="app" class="max-w-6xl mx-auto bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-300">
+        <!-- 顶部状态条 -->
+        <header class="bg-[#002D62] text-white p-5 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center">
+                <div class="p-2 bg-white rounded-lg mr-4">
+                    <svg class="w-8 h-8 text-[#002D62]" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black tracking-wider text-white">PE-SIM 虚拟仿真系统</h1>
+                    <p class="text-xs text-blue-200">仅供教学研究使用</p>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="toggleScoringDrawer()" class="flex items-center bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-lg transition-colors border border-blue-400">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    临床评分工具
+                </button>
+                <div class="flex gap-6 text-sm">
+                    <div class="text-center">
+                        <p class="text-blue-300 text-[10px] uppercase font-bold">学习积分</p>
+                        <p id="score-display" class="text-xl font-mono text-yellow-400">000</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex flex-col lg:flex-row relative">
+            <!-- 左侧：工作台 -->
+            <main class="flex-1 p-6 border-r border-gray-200">
+                <div id="stage-badge" class="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full mb-3 uppercase tracking-widest">仿真环境</div>
+                <h2 id="stage-title" class="text-2xl font-bold text-gray-800 mb-4">--</h2>
+                
+                <div id="narrative-box" class="relative mb-8">
+                    <div id="narrative" class="bg-blue-50 p-6 rounded-xl text-gray-700 leading-relaxed text-lg border-l-8 border-[#002D62]">
+                        <!-- 内容注入 -->
+                    </div>
+                </div>
+
+                <!-- 交互区域 -->
+                <div id="choices-container" class="space-y-3">
+                    <!-- 按钮注入 -->
+                </div>
+            </main>
+
+            <!-- 右侧：监护与化验 -->
+            <aside class="w-full lg:w-80 bg-gray-50 p-4 space-y-4">
+                <!-- 监护仪 -->
+                <div class="monitor-lcd rounded-xl p-4 text-green-500">
+                    <div class="flex justify-between items-center mb-2 border-b border-green-900 pb-1">
+                        <span class="text-[10px] font-bold">VITAL SIGNS MONITOR</span>
+                        <span class="text-[10px] animate-pulse">● LIVE</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-[10px] text-gray-400">HR</div>
+                            <div id="v-hr" class="lcd-text text-3xl font-bold">--</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-gray-400">SpO2</div>
+                            <div id="v-spo2" class="lcd-text text-3xl font-bold text-yellow-400">--</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-gray-400">BP</div>
+                            <div id="v-bp" class="lcd-text text-xl font-bold">--</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-gray-400">RR</div>
+                            <div id="v-rr" class="lcd-text text-xl font-bold">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 动态化验单 -->
+                <div class="bg-white border-2 border-dashed border-gray-300 rounded-xl p-4 lab-report">
+                    <h3 class="text-xs font-bold text-gray-500 mb-3 flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        实时检验/影像报告
+                    </h3>
+                    <div id="lab-results" class="text-[11px] space-y-2 font-mono text-blue-900">
+                        <p class="italic text-gray-400">等待检查触发...</p>
+                    </div>
+                </div>
+
+                <!-- 指南参考提示 -->
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-lg">
+                    <p class="text-[10px] font-bold text-yellow-800 uppercase mb-1">Guide Tip</p>
+                    <p id="guide-tip" class="text-xs text-yellow-700 italic">--</p>
+                </div>
+            </aside>
+
+            <!-- 评分工具模块 (侧边抽屉) -->
+            <div id="scoring-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 overflow-y-auto border-l border-gray-200">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-blue-900">临床决策评分工具</h3>
+                        <button onclick="toggleScoringDrawer()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                    </div>
+
+                    <!-- Wells 评分 -->
+                    <section class="mb-8 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        <h4 class="font-bold text-blue-800 mb-3 flex items-center">
+                            <span class="w-6 h-6 bg-blue-800 text-white rounded-full flex items-center justify-center text-xs mr-2">1</span>
+                            Wells 评分 (诊断可能性)
+                        </h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center text-sm p-2 bg-white rounded cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="wells-item mr-3" value="3.0"> 肺栓塞症状/体征 (+3.0)
+                            </label>
+                            <label class="flex items-center text-sm p-2 bg-white rounded cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="wells-item mr-3" value="3.0"> 其他诊断可能性小于肺栓塞 (+3.0)
+                            </label>
+                            <label class="flex items-center text-sm p-2 bg-white rounded cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="wells-item mr-3" value="1.5"> 心率 > 100次/分 (+1.5)
+                            </label>
+                            <label class="flex items-center text-sm p-2 bg-white rounded cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="wells-item mr-3" value="1.5"> 3天内手术/制动 (+1.5)
+                            </label>
+                            <label class="flex items-center text-sm p-2 bg-white rounded cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="wells-item mr-3" value="1.5"> 既往 PE 或 DVT 史 (+1.5)
+                            </label>
+                            <label class="flex items-center text-sm p-2 bg-white rounded cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="wells-item mr-3" value="1.0"> 咯血 (+1.0)
+                            </label>
+                            <label class="flex items-center text-sm p-2 bg-white rounded cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="wells-item mr-3" value="1.0"> 恶性肿瘤 (+1.0)
+                            </label>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-blue-200 flex justify-between items-center">
+                            <span class="text-sm font-bold">总分: <span id="wells-total" class="text-blue-700">0</span></span>
+                            <span id="wells-result" class="text-xs font-bold px-2 py-1 bg-gray-200 rounded uppercase">概率小</span>
+                        </div>
+                    </section>
+
+                    <!-- sPESI 评分 -->
+                    <section class="p-4 bg-red-50 rounded-xl border border-red-100">
+                        <h4 class="font-bold text-red-800 mb-3 flex items-center">
+                            <span class="w-6 h-6 bg-red-800 text-white rounded-full flex items-center justify-center text-xs mr-2">2</span>
+                            sPESI 评分 (预后分层)
+                        </h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center text-sm p-2 bg-white rounded cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="spesi-item mr-3" value="1"> 年龄 > 80 岁 (+1)
+                            </label>
+                            <label class="flex items-center text-sm p-2 bg-white rounded cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="spesi-item mr-3" value="1"> 恶性肿瘤 (+1)
+                            </label>
+                            <label class="flex items-center text-sm p-2 bg-white rounded cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="spesi-item mr-3" value="1"> 慢性心衰或肺部疾病 (+1)
+                            </label>
+                            <label class="flex items-center text-sm p-2 bg-white rounded cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="spesi-item mr-3" value="1"> 心率 ≥ 110 次/分 (+1)
+                            </label>
+                            <label class="flex items-center text-sm p-2 bg-white rounded cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="spesi-item mr-3" value="1"> 收缩压 < 100 mmHg (+1)
+                            </label>
+                            <label class="flex items-center text-sm p-2 bg-white rounded cursor-pointer hover:bg-gray-50">
+                                <input type="checkbox" class="spesi-item mr-3" value="1"> 血氧饱和度 < 90% (+1)
+                            </label>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-red-200 flex justify-between items-center">
+                            <span class="text-sm font-bold">总分: <span id="spesi-total" class="text-red-700">0</span></span>
+                            <span id="spesi-result" class="text-xs font-bold px-2 py-1 bg-green-200 text-green-800 rounded uppercase">低危</span>
+                        </div>
+                    </section>
+                    
+                    <p class="mt-6 text-[10px] text-gray-400 italic">注：评分工具仅作为临床参考辅助，具体决策需结合患者实际情况与 2025 指南建议。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部版权 -->
+        <div class="bg-gray-100 p-3 text-center text-[10px] text-gray-400 uppercase tracking-widest border-t border-gray-200">
+            制作：医学速递 公众号 | 2026
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            stage: 'init',
+            score: 0,
+            totalSteps: 0,
+            correctSteps: 0
+        };
+
+        const scenario = {
+            init: {
+                title: "模拟准备",
+                narrative: "欢迎进入急性肺栓塞 (APE) 仿真模拟。作为主治医生，你将接诊两名不同情况的疑似 PE 患者。你的每一个决策都将影响患者的生存率与你的评价。<br><br><b>请选择你要挑战的病例类型：</b>",
+                vitals: { hr: '--', bp: '--', spo2: '--', rr: '--' },
+                tip: "高危 PE 死亡率极高，中危 PE 则考验诊断的精准度。可点击上方“评分工具”辅助判断。",
+                choices: [
+                    { text: "病例 A：急诊室转入，血压极不稳定", next: 'a_start', score: 0 },
+                    { text: "病例 B：病房发生，呼吸急促但意识清醒", next: 'b_start', score: 0 }
+                ]
+            },
+            a_start: {
+                title: "危急现场 (Case A)",
+                narrative: "65岁女性，全膝置换术后3天。突发气促、冷汗。BP 82/54 mmHg, HR 128次/分。面色苍白，颈静脉怒张。",
+                vitals: { hr: 128, bp: '82/54', spo2: 86, rr: 32 },
+                tip: "识别血流动力学不稳定性是高危 PE 的第一步。sPESI 评分在此阶段意义重大。",
+                choices: [
+                    { text: "立即执行床旁超声心动图 (POCUS)", next: 'a_echo', score: 20 },
+                    { text: "立即推去做 CTPA 确诊", next: 'a_death_ct', score: -50 }
+                ]
+            },
+            a_echo: {
+                title: "床旁评估报告",
+                narrative: "超声显示：RV/LV 比值 1.2，室间隔向左心室偏移，下腔静脉增宽无塌陷。",
+                lab: "POCUS: RV Dysfunction (+)<br>Trop-I: 2.45 ng/mL (↑)",
+                vitals: { hr: 130, bp: '78/50', spo2: 84, rr: 35 },
+                tip: "右心功能障碍+低血压 = 高危 PE，需立即再灌注。",
+                choices: [
+                    { text: "启动溶栓治疗 (rt-PA 50mg)", next: 'a_success', score: 50 },
+                    { text: "普通肝素抗凝并严密观察", next: 'a_death_wait', score: -30 }
+                ]
+            },
+            a_death_ct: {
+                title: "严重医疗事故",
+                narrative: "患者在 CT 检查床上发生心跳骤停。高危患者严禁脱离监护去远距离检查！",
+                vitals: { hr: 0, bp: '0/0', spo2: 0, rr: 0 },
+                tip: "指南强调：血流动力学不稳定者不应搬动。",
+                choices: [{ text: "复盘并重新开始", next: 'init', score: 0 }]
+            },
+            a_death_wait: {
+                title: "病情恶化",
+                narrative: "仅给予肝素抗凝强度不足以解除梗阻。患者在入院2小时后因右心衰竭心跳骤停。",
+                vitals: { hr: 0, bp: '0/0', spo2: 0, rr: 0 },
+                tip: "高危患者首选再灌注（溶栓或介入）。",
+                choices: [{ text: "复盘并重新开始", next: 'init', score: 0 }]
+            },
+            a_success: {
+                title: "抢救成功",
+                narrative: "溶栓后1小时，患者血压回升。2025 指南强调：对于高危 PE，只要有右心功能不全的超声证据且血压不稳定，应立即再灌注。",
+                vitals: { hr: 92, bp: '110/70', spo2: 97, rr: 18 },
+                tip: "溶栓成功后应继续密切监护。",
+                choices: [{ text: "查看病例总结", next: 'summary', score: 30 }]
+            },
+            b_start: {
+                title: "辅助诊断 (Case B)",
+                narrative: "48岁女性，因“咳嗽气促”入院。BP 124/82 mmHg, HR 105次/分。Wells评分建议先进行评分计算。",
+                vitals: { hr: 105, bp: '124/82', spo2: 94, rr: 22 },
+                tip: "对于稳定患者，应先用 D-二聚体进行排除。先计算 Wells 评分判断可能性。",
+                choices: [
+                    { text: "急查 D-二聚体 (D-Dimer)", next: 'b_ddimer', score: 20 },
+                    { text: "直接行 CTPA 检查", next: 'b_ctpa', score: 10 }
+                ]
+            },
+            b_ddimer: {
+                title: "化验单反馈",
+                narrative: "患者 48 岁。D-二聚体结果为 1200 ng/mL。根据指南应如何处理？",
+                lab: "D-Dimer: 1200 ng/mL (Ref: <500)",
+                vitals: { hr: 102, bp: '120/80', spo2: 95, rr: 20 },
+                tip: "48岁尚未达到年龄修正D-二聚体的阈值（50岁）。",
+                choices: [
+                    { text: "阳性，建议进一步 CTPA", next: 'b_ctpa', score: 20 },
+                    { text: "阴性，可直接排除 PE", next: 'b_fail_ignore', score: -20 }
+                ]
+            },
+            b_fail_ignore: {
+                title: "误诊提醒",
+                narrative: "D-二聚体显著升高却选择排除，导致漏诊。患者数小时后出现呼吸衰竭。",
+                vitals: { hr: 115, bp: '110/70', spo2: 88, rr: 28 },
+                tip: "D-二聚体阴性预测价值高，但阳性必须进一步检查。",
+                choices: [{ text: "返回重试", next: 'b_ddimer', score: 0 }]
+            },
+            b_ctpa: {
+                title: "影像学确诊",
+                narrative: "CTPA 显示双肺动脉主干填塞。后续危险分层需要哪些指标？",
+                lab: "CTPA: Massive PE (+)<br>NT-proBNP: 1800 pg/mL (↑)",
+                vitals: { hr: 108, bp: '118/76', spo2: 92, rr: 24 },
+                tip: "确诊后应进行 PESI 评分或生物标志物评估分层。",
+                choices: [
+                    { text: "测定肌钙蛋白及右心功能", next: 'b_stratify', score: 30 },
+                    { text: "直接开始口服华法林", next: 'b_fail_warfarin', score: -10 }
+                ]
+            },
+            b_fail_warfarin: {
+                title: "用药错误",
+                narrative: "急性期首选 LMWH 或 DOACs。华法林起效慢且有促凝风险，不能作为起始单一治疗。",
+                vitals: { hr: 108, bp: '118/76', spo2: 92, rr: 24 },
+                tip: "2025 指南建议起始阶段使用新型口服抗凝药。",
+                choices: [{ text: "返回重试", next: 'b_ctpa', score: 0 }]
+            },
+            b_stratify: {
+                title: "危险分层：中高危",
+                narrative: "患者肌钙蛋白阳性，超声提示右心扩大。该患者属于“中高危”。",
+                lab: "Troponin: (+)<br>RV/LV: 1.1",
+                vitals: { hr: 110, bp: '115/70', spo2: 91, rr: 26 },
+                tip: "中高危 PE 需要密切监护，随时准备抢救性溶栓。",
+                choices: [
+                    { text: "住院抗凝并严密监测血压", next: 'b_success', score: 40 },
+                    { text: "门诊利伐沙班抗凝", next: 'b_fail_home', score: -30 }
+                ]
+            },
+            b_fail_home: {
+                title: "安全风险",
+                narrative: "中高危患者有 5-10% 的概率在短期内演变为高危，绝不能居家治疗。",
+                vitals: { hr: 110, bp: '115/70', spo2: 91, rr: 26 },
+                tip: "仅低危患者（sPESI=0）可考虑早期出院。",
+                choices: [{ text: "返回重试", next: 'b_stratify', score: 0 }]
+            },
+            b_success: {
+                title: "规范化管理",
+                narrative: "中高危患者需住院监护，防止演变为高危。你选择了正确的策略。",
+                vitals: { hr: 88, bp: '120/80', spo2: 98, rr: 16 },
+                tip: "监护 48-72 小时后若稳定可转入普通病房。",
+                choices: [{ text: "查看总结", next: 'summary', score: 10 }]
+            },
+            summary: {
+                title: "模拟结课评价",
+                narrative: "恭喜完成 2025 APE 模拟教学。在实际临床中，请牢记：<b>高危看超声，低危看二聚体，中危看监测。</b>",
+                vitals: { hr: 75, bp: '120/80', spo2: 99, rr: 14 },
+                tip: "始终保持对 PE 的高度警惕。",
+                choices: [{ text: "重新挑战", next: 'init', score: 0 }]
+            }
+        };
+
+        // 切换评分抽屉
+        function toggleScoringDrawer() {
+            const drawer = document.getElementById('scoring-drawer');
+            drawer.classList.toggle('open');
+        }
+
+        // 计算 Wells 评分
+        function calculateWells() {
+            let total = 0;
+            document.querySelectorAll('.wells-item:checked').forEach(i => total += parseFloat(i.value));
+            document.getElementById('wells-total').innerText = total.toFixed(1);
+            
+            const resultEl = document.getElementById('wells-result');
+            if (total >= 4) {
+                resultEl.innerText = "概率大";
+                resultEl.className = "text-xs font-bold px-2 py-1 bg-red-200 text-red-800 rounded uppercase";
+            } else {
+                resultEl.innerText = "概率小";
+                resultEl.className = "text-xs font-bold px-2 py-1 bg-gray-200 text-gray-800 rounded uppercase";
+            }
+        }
+
+        // 计算 sPESI 评分
+        function calculateSPESI() {
+            let total = 0;
+            document.querySelectorAll('.spesi-item:checked').forEach(i => total += parseInt(i.value));
+            document.getElementById('spesi-total').innerText = total;
+            
+            const resultEl = document.getElementById('spesi-result');
+            if (total >= 1) {
+                resultEl.innerText = "中高危";
+                resultEl.className = "text-xs font-bold px-2 py-1 bg-red-200 text-red-800 rounded uppercase";
+            } else {
+                resultEl.innerText = "低危";
+                resultEl.className = "text-xs font-bold px-2 py-1 bg-green-200 text-green-800 rounded uppercase";
+            }
+        }
+
+        function updateUI() {
+            const step = scenario[state.stage];
+            if (!step) return;
+
+            document.getElementById('stage-title').innerText = step.title || "--";
+            document.getElementById('narrative').innerHTML = step.narrative || "--";
+            document.getElementById('guide-tip').innerText = step.tip || "请做出判断。";
+            
+            const v = step.vitals || { hr: '--', bp: '--', spo2: '--', rr: '--' };
+            document.getElementById('v-hr').innerText = v.hr;
+            document.getElementById('v-bp').innerText = v.bp;
+            document.getElementById('v-spo2').innerText = v.spo2;
+            document.getElementById('v-rr').innerText = v.rr;
+
+            const spo2El = document.getElementById('v-spo2');
+            const spo2Val = parseInt(v.spo2);
+            if (!isNaN(spo2Val) && spo2Val < 90 && spo2Val > 0) {
+                spo2El.classList.add('text-red-500', 'animate-blink');
+                spo2El.classList.remove('text-yellow-400');
+            } else {
+                spo2El.classList.remove('text-red-500', 'animate-blink');
+                spo2El.classList.add('text-yellow-400');
+            }
+
+            const labDiv = document.getElementById('lab-results');
+            if (step.lab) {
+                labDiv.innerHTML = `<div class="bg-blue-100 p-2 rounded">${step.lab}</div>`;
+            } else {
+                labDiv.innerHTML = `<p class="italic text-gray-400">等待检查触发...</p>`;
+            }
+
+            const container = document.getElementById('choices-container');
+            container.innerHTML = '';
+            if (step.choices) {
+                step.choices.forEach(c => {
+                    const btn = document.createElement('div');
+                    btn.className = "choice-card p-4 bg-white border border-gray-200 rounded-xl cursor-pointer shadow-sm flex justify-between items-center group border-l-[#002D62]";
+                    btn.innerHTML = `
+                        <span class="font-medium text-gray-700">${c.text}</span>
+                        <span class="text-blue-900 opacity-0 group-hover:opacity-100 transition-opacity">执行指令 →</span>
+                    `;
+                    btn.onclick = () => {
+                        if (c.score !== 0) {
+                            state.score += c.score;
+                            state.totalSteps++;
+                            if (c.score > 0) state.correctSteps++;
+                            updateHeader();
+                        }
+                        state.stage = c.next;
+                        updateUI();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    };
+                    container.appendChild(btn);
+                });
+            }
+        }
+
+        function updateHeader() {
+            document.getElementById('score-display').innerText = String(state.score).padStart(3, '0');
+        }
+
+        // 初始化
+        window.onload = () => {
+            updateUI();
+            updateHeader();
+            
+            // 绑定评分监听
+            document.querySelectorAll('.wells-item').forEach(el => el.addEventListener('change', calculateWells));
+            document.querySelectorAll('.spesi-item').forEach(el => el.addEventListener('change', calculateSPESI));
+        };
+    </script>
+</body>
+</html>
