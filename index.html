@@ -2,580 +2,146 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>私密网络记事本 | 安全笔记</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>待办事项</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none; /* 提升一点质感，不影响输入框内文字选择 */
-        }
-
         body {
-            background: linear-gradient(145deg, #1a2a3a 0%, #0f1a24 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, -apple-system, sans-serif;
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
             padding: 20px;
+            background-color: #f0f0f0;
         }
-
-        /* 主容器卡片效果 */
-        .app-container {
-            width: 100%;
-            max-width: 700px;
-            background: rgba(255, 255, 255, 0.07);
-            backdrop-filter: blur(2px);
-            border-radius: 2.5rem;
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08);
-            overflow: hidden;
-            transition: all 0.2s ease;
-        }
-
-        /* 面板通用样式 */
-        .panel {
-            background: #fefcf5;
-            background: linear-gradient(135deg, #fffef7 0%, #f8f6f0 100%);
-            padding: 1.8rem 2rem 2.2rem;
-            border-radius: 2rem;
-            margin: 1rem;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        /* 登录面板特殊装饰 */
-        .login-panel {
+        
+        h1 {
+            color: #333;
             text-align: center;
         }
-
-        h2 {
-            font-size: 1.9rem;
-            font-weight: 600;
-            background: linear-gradient(120deg, #2c3e2f, #1f4f2d);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            letter-spacing: -0.3px;
-            margin-bottom: 0.5rem;
-        }
-
-        .sub {
-            color: #5e6f5d;
-            margin-bottom: 2rem;
-            font-weight: 500;
-            font-size: 0.9rem;
-            border-bottom: 1px dashed #d4dbc0;
-            display: inline-block;
-            padding-bottom: 0.3rem;
-        }
-
-        .input-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            color: #2e4a2c;
-            margin-bottom: 0.4rem;
-            font-size: 0.9rem;
-            letter-spacing: 0.3px;
-        }
-
-        input {
-            width: 100%;
-            padding: 0.9rem 1rem;
-            font-size: 1rem;
-            border: 2px solid #e2e6d9;
-            border-radius: 1.5rem;
+        
+        .todo-container {
             background: white;
-            transition: 0.2s;
-            outline: none;
-            font-family: inherit;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        input:focus {
-            border-color: #5b8c5a;
-            box-shadow: 0 0 0 3px rgba(70, 130, 70, 0.2);
-        }
-
-        button {
-            background: #2c5e2d;
-            border: none;
-            color: white;
-            font-weight: bold;
-            font-size: 1.05rem;
-            padding: 0.85rem 1.8rem;
-            border-radius: 3rem;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
-            font-family: inherit;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        button:hover {
-            background: #1f4620;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-        }
-
-        button:active {
-            transform: translateY(1px);
-        }
-
-        .error-msg {
-            color: #c23b22;
-            background: #ffe6e2;
-            padding: 0.6rem;
-            border-radius: 2rem;
-            font-size: 0.85rem;
-            margin-top: 1rem;
-            display: inline-block;
-            width: 100%;
-            font-weight: 500;
-        }
-
-        /* 记事本面板 */
-        .notepad-header {
+        
+        .input-group {
             display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
-            border-bottom: 2px solid #e0e5d3;
-            padding-bottom: 0.8rem;
+            gap: 10px;
+            margin-bottom: 20px;
         }
-
-        .notepad-header h3 {
-            font-size: 1.6rem;
-            font-weight: 600;
-            color: #2d4a22;
+        
+        #todo-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .todo-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .todo-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
         }
-
-        .user-badge {
-            background: #e9f0e3;
-            padding: 0.25rem 0.9rem;
-            border-radius: 40px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #2f6b2f;
+        
+        .todo-item.completed span {
+            text-decoration: line-through;
+            color: #888;
         }
-
-        .logout-btn {
-            background: #afbfa3;
-            box-shadow: none;
-            width: auto;
-            padding: 0.5rem 1.2rem;
-            font-size: 0.8rem;
-            border-radius: 2rem;
+        
+        .delete-btn {
+            background-color: #ff4444;
+            margin-left: auto;
+            padding: 4px 8px;
         }
-
-        .logout-btn:hover {
-            background: #8d9e7c;
-            transform: none;
-        }
-
-        textarea {
-            width: 100%;
-            height: 380px;
-            padding: 1.2rem;
-            font-size: 1rem;
-            line-height: 1.5;
-            border: 2px solid #d9dfce;
-            border-radius: 1.5rem;
-            background: #ffffff;
-            font-family: 'Courier New', 'Fira Code', monospace;
-            resize: vertical;
-            outline: none;
-            transition: 0.2s;
-            color: #1c2b1a;
-        }
-
-        textarea:focus {
-            border-color: #5b8c5a;
-            box-shadow: 0 0 0 3px rgba(80, 120, 70, 0.2);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .save-btn {
-            background: #3c7840;
-            flex: 2;
-        }
-
-        .clear-btn {
-            background: #7f8c6d;
-            flex: 1;
-            box-shadow: none;
-        }
-
-        .clear-btn:hover {
-            background: #5c684b;
-        }
-
-        .info-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 1rem;
-            font-size: 0.75rem;
-            color: #6a715e;
-            padding: 0 0.3rem;
-        }
-
-        .auto-save-hint {
-            background: #eef3e5;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-        }
-
-        footer {
-            text-align: center;
-            font-size: 0.7rem;
-            color: #9aa986;
-            margin-top: 1.2rem;
-            padding-bottom: 0.5rem;
-        }
-
-        @media (max-width: 550px) {
-            .panel {
-                padding: 1.3rem;
-            }
-            textarea {
-                height: 280px;
-            }
-            .notepad-header {
-                flex-direction: column;
-                gap: 10px;
-            }
+        
+        .delete-btn:hover {
+            background-color: #cc0000;
         }
     </style>
 </head>
 <body>
-<div class="app-container" id="appRoot">
-    <!-- 动态内容由js渲染 -->
-</div>
+    <div class="todo-container">
+        <h1>待办事项</h1>
+        <div class="input-group">
+            <input type="text" id="todo-input" placeholder="输入新任务...">
+            <button onclick="addTodo()">添加</button>
+        </div>
+        <ul id="todo-list" class="todo-list"></ul>
+    </div>
 
-<script>
-    (function(){
-        // ---------- 严格配置 ----------
-        const VALID_USERNAME = "cd";
-        const VALID_PASSWORD = "cd";
-        const STORAGE_KEY = "secure_notepad_cd_data";   // 存储笔记内容
-        const SESSION_KEY = "notepad_auth_token";       // 模拟登录态
-        
-        // DOM 元素引用
-        let rootEl = document.getElementById('appRoot');
-        
-        // 辅助函数: 检查登录状态
-        function isAuthenticated() {
-            return sessionStorage.getItem(SESSION_KEY) === "authenticated_cd";
-        }
-        
-        // 执行登出
-        function logout() {
-            sessionStorage.removeItem(SESSION_KEY);
-            render(); // 重新渲染登录界面
-        }
-        
-        // 保存笔记到 localStorage
-        function saveNoteContent(content) {
-            try {
-                localStorage.setItem(STORAGE_KEY, content);
-                return true;
-            } catch(e) {
-                console.warn("保存失败", e);
-                return false;
-            }
-        }
-        
-        // 读取已保存的笔记
-        function loadNoteContent() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            return saved !== null ? saved : "";
-        }
-        
-        // 处理登录逻辑
-        function attemptLogin(username, password) {
-            if(username === VALID_USERNAME && password === VALID_PASSWORD) {
-                sessionStorage.setItem(SESSION_KEY, "authenticated_cd");
-                return true;
-            }
-            return false;
-        }
-        
-        // 渲染主视图 (根据登录态展示不同面板)
-        function render() {
-            if(!rootEl) return;
-            const loggedIn = isAuthenticated();
-            if(!loggedIn) {
-                renderLoginPanel();
-            } else {
-                renderNotepadPanel();
-            }
-        }
-        
-        // 渲染登录界面 (包含错误反馈)
-        function renderLoginPanel() {
-            // 创建一个干净的结构，并绑定事件
-            rootEl.innerHTML = `
-                <div class="panel login-panel">
-                    <h2>📔 私密记事本</h2>
-                    <div class="sub">安全 · 极简 · 本地加密存储</div>
-                    <div class="input-group">
-                        <label>👤 用户名</label>
-                        <input type="text" id="loginUsername" placeholder="用户名" autocomplete="off" value="">
-                    </div>
-                    <div class="input-group">
-                        <label>🔒 密码</label>
-                        <input type="password" id="loginPassword" placeholder="密码" autocomplete="off">
-                    </div>
-                    <button id="loginBtn">🔑 登录记事本</button>
-                    <div id="loginErrorMessage" style="min-height: 50px;"></div>
-                    <footer>🔐 仅限授权用户 (用户名/密码: cd)</footer>
-                </div>
-            `;
+    <script>
+        // 获取 DOM 元素
+        const todoInput = document.getElementById('todo-input');
+        const todoList = document.getElementById('todo-list');
+
+        // 添加任务
+        function addTodo() {
+            const todoText = todoInput.value.trim();
             
-            // 获取元素
-            const usernameInput = document.getElementById('loginUsername');
-            const passwordInput = document.getElementById('loginPassword');
-            const loginBtn = document.getElementById('loginBtn');
-            const errorContainer = document.getElementById('loginErrorMessage');
-            
-            // 自动填充演示提示 (开发友好)
-            if(usernameInput) usernameInput.value = '';
-            if(passwordInput) passwordInput.value = '';
-            
-            // 定义登录处理函数
-            function handleLogin() {
-                const username = usernameInput ? usernameInput.value.trim() : '';
-                const password = passwordInput ? passwordInput.value : '';
-                if(attemptLogin(username, password)) {
-                    // 登录成功，重新渲染记事本
-                    render();
-                } else {
-                    if(errorContainer) {
-                        errorContainer.innerHTML = `<div class="error-msg">❌ 用户名或密码错误，访问拒绝。</div>`;
-                    }
-                    // 清空密码框提升体验
-                    if(passwordInput) passwordInput.value = '';
-                    // 2秒后自动清除错误提示
-                    setTimeout(() => {
-                        if(errorContainer) errorContainer.innerHTML = '';
-                    }, 2000);
-                }
+            if (todoText === '') {
+                alert('请输入任务内容！');
+                return;
             }
+
+            const todoItem = document.createElement('li');
+            todoItem.className = 'todo-item';
             
-            if(loginBtn) {
-                loginBtn.addEventListener('click', handleLogin);
-            }
-            // 支持回车键快速登录
-            const handleKeyPress = (e) => {
-                if(e.key === 'Enter') {
-                    e.preventDefault();
-                    handleLogin();
-                }
+            // 创建复选框
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.onclick = function() {
+                todoItem.classList.toggle('completed');
             };
-            if(usernameInput) usernameInput.addEventListener('keypress', handleKeyPress);
-            if(passwordInput) passwordInput.addEventListener('keypress', handleKeyPress);
+            
+            // 创建任务文本
+            const textSpan = document.createElement('span');
+            textSpan.textContent = todoText;
+            textSpan.style.marginLeft = '10px';
+            
+            // 创建删除按钮
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '删除';
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.onclick = function() {
+                todoList.removeChild(todoItem);
+            };
+            
+            // 组装元素
+            todoItem.appendChild(checkbox);
+            todoItem.appendChild(textSpan);
+            todoItem.appendChild(deleteBtn);
+            todoList.appendChild(todoItem);
+            
+            // 清空输入框
+            todoInput.value = '';
         }
-        
-        // 渲染记事本主界面 (含自动保存 + 手动按钮)
-        function renderNotepadPanel() {
-            // 获取已存储内容
-            let currentContent = loadNoteContent();
-            
-            rootEl.innerHTML = `
-                <div class="panel">
-                    <div class="notepad-header">
-                        <h3>
-                            📝 安全网络记事本
-                            <span class="user-badge">${VALID_USERNAME}</span>
-                        </h3>
-                        <button class="logout-btn" id="logoutButton">🚪 退出登录</button>
-                    </div>
-                    <textarea id="noteTextArea" placeholder="✍️ 写下你的想法、任务或任何私密笔记...&#10;内容会自动保存在浏览器中，仅你可见。">${escapeHtml(currentContent)}</textarea>
-                    <div class="action-buttons">
-                        <button class="save-btn" id="manualSaveBtn">💾 手动保存笔记</button>
-                        <button class="clear-btn" id="clearAllBtn">🗑️ 清空编辑器</button>
-                    </div>
-                    <div class="info-bar">
-                        <span>✨ 自动保存已开启 (输入后自动缓存)</span>
-                        <span class="auto-save-hint" id="saveIndicator">📌 已同步</span>
-                    </div>
-                    <footer>🔒 笔记数据仅存储于您的浏览器本地，logout不会清除笔记，下次登录继续。</footer>
-                </div>
-            `;
-            
-            const textarea = document.getElementById('noteTextArea');
-            const logoutBtn = document.getElementById('logoutButton');
-            const manualSaveBtn = document.getElementById('manualSaveBtn');
-            const clearBtn = document.getElementById('clearAllBtn');
-            const saveIndicator = document.getElementById('saveIndicator');
-            
-            // 更新指示器短暂闪烁
-            function indicateSaved() {
-                if(saveIndicator) {
-                    saveIndicator.innerHTML = '✅ 已保存';
-                    saveIndicator.style.color = '#2b6e2f';
-                    setTimeout(() => {
-                        if(saveIndicator) {
-                            saveIndicator.innerHTML = '📌 已同步';
-                            saveIndicator.style.color = '';
-                        }
-                    }, 1500);
-                }
-            }
-            
-            // 保存内容的函数 (从textarea获取并写入localStorage)
-            function persistNote() {
-                if(!textarea) return false;
-                const content = textarea.value;
-                const success = saveNoteContent(content);
-                if(success) {
-                    indicateSaved();
-                } else {
-                    if(saveIndicator) {
-                        saveIndicator.innerHTML = '⚠️ 保存失败';
-                        setTimeout(() => {
-                            if(saveIndicator && !isAuthenticated()) return;
-                            if(saveIndicator) saveIndicator.innerHTML = '📌 已同步';
-                        }, 1500);
-                    }
-                }
-                return success;
-            }
-            
-            // 自动保存防抖 (提高实时性，且不频繁)
-            let autoSaveTimer = null;
-            function debouncedAutoSave() {
-                if(autoSaveTimer) clearTimeout(autoSaveTimer);
-                autoSaveTimer = setTimeout(() => {
-                    if(textarea && isAuthenticated()) {
-                        persistNote();
-                    }
-                }, 600);
-            }
-            
-            // 监听输入事件 (自动保存)
-            if(textarea) {
-                textarea.addEventListener('input', () => {
-                    debouncedAutoSave();
-                });
-                // 失去焦点时立即保存一次，确保最终状态
-                textarea.addEventListener('blur', () => {
-                    if(autoSaveTimer) clearTimeout(autoSaveTimer);
-                    persistNote();
-                });
-            }
-            
-            // 手动保存按钮
-            if(manualSaveBtn) {
-                manualSaveBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    persistNote();
-                });
-            }
-            
-            // 清空按钮 (清空文本区并保存清空内容)
-            if(clearBtn) {
-                clearBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if(textarea) {
-                        if(confirm('⚠️ 确定要清空所有笔记内容吗？此操作不可撤销(但之前存储会被覆盖)。')) {
-                            textarea.value = '';
-                            persistNote(); // 保存空白内容到storage
-                            if(textarea) textarea.focus();
-                        }
-                    }
-                });
-            }
-            
-            // 退出登录按钮
-            if(logoutBtn) {
-                logoutBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    // 退出前可选择性保存最后一次变动，以防万一
-                    if(textarea) {
-                        saveNoteContent(textarea.value);
-                    }
-                    logout();
-                });
-            }
-            
-            // 可选: 页面关闭前保存一次最新内容 (增强鲁棒)
-            window.addEventListener('beforeunload', () => {
-                if(isAuthenticated() && textarea) {
-                    saveNoteContent(textarea.value);
-                }
-            });
-            
-            // 稍微延迟确保初始化指示器不闪烁
-            setTimeout(() => {
-                if(saveIndicator) saveIndicator.innerHTML = '💾 自动保存就绪';
-                setTimeout(() => {
-                    if(saveIndicator && isAuthenticated()) saveIndicator.innerHTML = '📌 已同步';
-                }, 800);
-            }, 100);
-        }
-        
-        // 简单的转义函数，防止XSS (尽管内容存于textarea，但innerHTML展示时最好安全)
-        function escapeHtml(str) {
-            if(!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if(m === '&') return '&amp;';
-                if(m === '<') return '&lt;';
-                if(m === '>') return '&gt;';
-                return m;
-            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-                return c;
-            });
-        }
-        
-        // 监听sessionStorage变化(如果是多标签，可选简单同步特权，但不做复杂处理；提升体验：保证登录状态同步简单处理)
-        // 当其他标签页登录/登出时，本页可以监听storage事件但sessionStorage不同域，简化处理: 仅页面刷新或本页操作
-        // 增加路由初始化和登出后全局重绘
-        window.addEventListener('storage', (e) => {
-            // 如果localStorage里的笔记在其他页面被修改，这里同步当前记事本的内容（若登录状态下）
-            if(e.key === STORAGE_KEY && isAuthenticated()) {
-                const textarea = document.getElementById('noteTextArea');
-                if(textarea && document.body.contains(textarea)) {
-                    const newValue = e.newValue !== null ? e.newValue : "";
-                    if(textarea.value !== newValue) {
-                        textarea.value = newValue;
-                        // 简单提示用户外部修改
-                        const indicator = document.getElementById('saveIndicator');
-                        if(indicator) {
-                            indicator.innerHTML = '🔄 外部同步';
-                            setTimeout(() => {
-                                if(indicator && isAuthenticated()) indicator.innerHTML = '📌 已同步';
-                            }, 1200);
-                        }
-                    }
-                }
+
+        // 按回车键添加任务
+        todoInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                addTodo();
             }
         });
-        
-        // 简单监听页面可见变化时，若有登录但是文本域内容可能滞后，不做额外（不影响核心）
-        // 额外功能：在退出登录状态时，清理任何自动保存计时器（可选）
-        // 确保每次渲染时解除旧监听？由于每次render完全替换dom，旧监听自动消失，无需手动解绑。
-        
-        // 初始化渲染
-        render();
-        
-        // 附加小功能：若用户已经登录，并且刷新页面或者第一次加载，确保记事本面板正常；无需额外动作
-        // 如果用户在登录状态下直接关闭页面，beforeunload已经做了最后保存。安全。
-    })();
-</script>
+    </script>
 </body>
 </html>
