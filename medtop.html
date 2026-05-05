@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医学顶刊及急重症文献导航 - 2026专业版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;700&display=swap');
+        body { 
+            font-family: 'Inter', 'Noto Sans SC', sans-serif; 
+            background-color: #f1f5f9; 
+            color: #1e293b; 
+        }
+        .journal-tag { 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            border: 1px solid #e2e8f0; 
+            background: #ffffff;
+        }
+        .journal-tag:hover { 
+            background: #f8fafc; 
+            border-color: #3b82f6; 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        .article-card { 
+            transition: all 0.2s ease; 
+            border-left: 4px solid transparent; 
+            cursor: pointer;
+            position: relative;
+            user-select: none; 
+        }
+        .article-card:hover { 
+            background: #f8fafc; 
+            border-left-color: #3b82f6; 
+        }
+        .en-title { 
+            color: #64748b; 
+            font-size: 0.75rem; 
+            line-height: 1.3; 
+            margin-top: 4px; 
+            display: block; 
+            font-style: italic;
+        }
+        .zh-title { 
+            color: #0f172a; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            line-height: 1.5; 
+        }
+        .tag-pill { 
+            font-size: 10px; 
+            padding: 2px 8px; 
+            border-radius: 9999px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            margin-right: 8px;
+        }
+        .copy-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.9);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-size: 13px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+    <div id="toast" class="copy-toast">已成功复制英文标题</div>
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl font-black text-slate-900 mb-3 tracking-tight">
+                急重症医学文献情报站 <span class="text-blue-600 italic">2026</span>
+            </h1>
+            <div class="inline-flex flex-col md:flex-row items-center gap-2 px-4 py-2 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center">
+                    <span class="flex h-2 w-2 rounded-full bg-blue-500 mr-2"></span>
+                    <p class="text-slate-600 text-sm font-medium">期刊卡片：跳转主页</p>
+                </div>
+                <span class="hidden md:block text-slate-300">|</span>
+                <div class="flex items-center">
+                    <span class="flex h-2 w-2 rounded-full bg-emerald-500 mr-2"></span>
+                    <p class="text-slate-600 text-sm font-medium">文献左键：Google 搜索</p>
+                </div>
+                <span class="hidden md:block text-slate-300">|</span>
+                <div class="flex items-center">
+                    <span class="flex h-2 w-2 rounded-full bg-amber-500 mr-2"></span>
+                    <p class="text-slate-600 text-sm font-medium">文献右键：复制标题</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- 四大顶刊直达 -->
+        <section class="mb-8">
+            <div class="flex items-center mb-5">
+                <h2 class="text-lg font-bold text-slate-800 border-l-4 border-blue-600 pl-3">四大医学顶刊 (The Big Four)</h2>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="https://www.nejm.org/" target="_blank" class="journal-tag p-5 rounded-2xl text-center">
+                    <span class="text-xl font-black text-blue-900 block">NEJM</span>
+                    <span class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold">New England Journal</span>
+                </a>
+                <a href="https://www.thelancet.com/" target="_blank" class="journal-tag p-5 rounded-2xl text-center">
+                    <span class="text-xl font-black text-red-700 block">THE LANCET</span>
+                    <span class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold">Global Health</span>
+                </a>
+                <a href="https://jamanetwork.com/journals/jama" target="_blank" class="journal-tag p-5 rounded-2xl text-center">
+                    <span class="text-xl font-black text-slate-800 block">JAMA</span>
+                    <span class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold">AMA Network</span>
+                </a>
+                <a href="https://www.bmj.com/" target="_blank" class="journal-tag p-5 rounded-2xl text-center">
+                    <span class="text-xl font-black text-emerald-700 block">THE BMJ</span>
+                    <span class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold">British Medical Journal</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- 领域核心库 -->
+        <section class="mb-12">
+            <div class="flex items-center mb-5">
+                <h2 class="text-lg font-bold text-slate-800 border-l-4 border-slate-400 pl-3">领域核心库 (Core Specialist TOP 20)</h2>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                <a href="https://www.icmjournal.org/" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">Intensive Care Med</span></a>
+                <a href="https://journals.lww.com/ccmjournal/pages/default.aspx" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">Crit Care Med</span></a>
+                <a href="https://www.atsjournals.org/journal/ajrccm" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">AJRCCM</span></a>
+                <a href="https://www.thelancet.com/journals/lanres/home" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">Lancet Respir Med</span></a>
+                <a href="https://ccforum.biomedcentral.com/" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">Critical Care</span></a>
+                <a href="https://journal.chestnet.org/" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">CHEST</span></a>
+                <a href="https://www.atsjournals.org/journal/annalsats" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">Annals ATS</span></a>
+                <a href="https://www.annemergmed.com/" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">Ann Emerg Med</span></a>
+                <a href="https://emj.bmj.com/" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">Emerg Med J</span></a>
+                <a href="https://www.resuscitationjournal.com/" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">Resuscitation</span></a>
+                <a href="https://www.jccjournal.org/" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">J Crit Care</span></a>
+                <a href="https://journals.lww.com/co-criticalcare/pages/default.aspx" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">Curr Opin Crit Care</span></a>
+                <a href="https://link.springer.com/journal/12028" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">Neurocrit Care</span></a>
+                <a href="https://journals.lww.com/shockjournal/pages/default.aspx" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">SHOCK</span></a>
+                <a href="https://academic.oup.com/jbcr" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">J Burn Care Res</span></a>
+                <a href="https://journals.lww.com/jtrauma/pages/default.aspx" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">J Trauma ACS</span></a>
+                <a href="https://www.thelancet.com/journals/lanhae/home" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">Lancet Haematol</span></a>
+                <a href="https://journals.lww.com/pccmjournal/pages/default.aspx" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">PCCM</span></a>
+                <a href="https://www.ajemjournal.com/" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">Am J Emerg Med</span></a>
+                <a href="https://www.criticalcare.theclinics.com/" target="_blank" class="journal-tag p-3 rounded-xl text-center"><span class="text-[11px] font-bold text-slate-700">Crit Care Clin</span></a>
+            </div>
+        </section>
+
+        <!-- 文献列表 (扩充至 TOP 30) -->
+        <section class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50/80 flex justify-between items-center sticky top-0 z-10 backdrop-blur-sm">
+                <h2 class="text-xl font-bold flex items-center text-slate-800">
+                    精选文献 TOP 30
+                </h2>
+                <p class="text-xs text-slate-400">左键点击搜索 / 右键点击复制</p>
+            </div>
+
+            <div id="article-list" class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+                <!-- 第一列 (1-15) -->
+                <div class="divide-y divide-slate-50">
+                    <div class="article-card p-5" data-en="2026 AHA Guidelines for Risk Assessment and Catheter-Directed Intervention in Adult Acute Pulmonary Embolism">
+                        <span class="tag-pill bg-blue-50 text-blue-600">Guideline</span>
+                        <h3 class="zh-title">2026 AHA 成人急性肺栓塞风险评估与导管干预指南</h3>
+                        <span class="en-title">2026 AHA Guidelines for Risk Assessment and Catheter-Directed Intervention in Adult Acute Pulmonary Embolism</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Early Revascularization Management in Acute Ischemic Stroke: 2026 Clinical Practice Guidelines">
+                        <span class="tag-pill bg-blue-50 text-blue-600">Guideline</span>
+                        <h3 class="zh-title">2026 急性缺血性卒中早期血管再通管理共识 (JAMA)</h3>
+                        <span class="en-title">Early Revascularization Management in Acute Ischemic Stroke: 2026 Clinical Practice Guidelines</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Identification and Management of Sepsis-Induced Coagulopathy (SIC): A Joint SCCM/ESICM Consensus Statement">
+                        <span class="tag-pill bg-purple-50 text-purple-600">Consensus</span>
+                        <h3 class="zh-title">SCCM/ESICM 脓毒症诱发凝血病(SIC)识别与处理专家共识</h3>
+                        <span class="en-title">Identification and Management of Sepsis-Induced Coagulopathy (SIC): A Joint SCCM/ESICM Consensus Statement</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Precision Fluid Therapy in the ICU: Moving Beyond Static Measures to Dynamic Responsiveness">
+                        <span class="tag-pill bg-emerald-50 text-emerald-600">Review</span>
+                        <h3 class="zh-title">重症监护中的精准液体治疗：从静态指标到动态反应</h3>
+                        <span class="en-title">Precision Fluid Therapy in the ICU: Moving Beyond Static Measures to Dynamic Responsiveness</span>
+                    </div>
+                    <div class="article-card p-5" data-en="The RECOVER-ICU Trial: Long-term Outcomes of Early Mobility in Moderate-to-Severe ARDS Patients">
+                        <span class="tag-pill bg-yellow-50 text-yellow-700">RCT</span>
+                        <h3 class="zh-title">RECOVER-ICU 试验：早期活动对中重度 ARDS 患者远期预后的影响</h3>
+                        <span class="en-title">The RECOVER-ICU Trial: Long-term Outcomes of Early Mobility in Moderate-to-Severe ARDS Patients</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Case Records of MGH: Multisystem Inflammatory Syndrome Presenting as Fulminant Myocarditis">
+                        <span class="tag-pill bg-orange-50 text-orange-600">Case Report</span>
+                        <h3 class="zh-title">MGH病例记录：一例以爆发性心肌炎起病的多系统炎症综合征</h3>
+                        <span class="en-title">Case Records of MGH: Multisystem Inflammatory Syndrome Presenting as Fulminant Myocarditis</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Clinical Practice Guidelines for the Prevention and Management of Delirium in the ICU (PADIS 2026)">
+                        <span class="tag-pill bg-blue-50 text-blue-600">Guideline</span>
+                        <h3 class="zh-title">2026版 重症监护病房谵妄预防与管理国际指南 (PADIS)</h3>
+                        <span class="en-title">Clinical Practice Guidelines for the Prevention and Management of Delirium in the ICU (PADIS 2026)</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Airway Management and Extubation Readiness in Neurocritical Care: An International Multidisciplinary Consensus">
+                        <span class="tag-pill bg-purple-50 text-purple-600">Consensus</span>
+                        <h3 class="zh-title">神经重症患者气道管理与拔管决策：国际多学科共识</h3>
+                        <span class="en-title">Airway Management and Extubation Readiness in Neurocritical Care: An International Multidisciplinary Consensus</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Sepsis Molecular Phenotypes: Transitioning from Immunosuppression to Hyperinflammation">
+                        <span class="tag-pill bg-emerald-50 text-emerald-600">Review</span>
+                        <h3 class="zh-title">脓毒症分子表型：从免疫抑制到高炎症反应的转化</h3>
+                        <span class="en-title">Sepsis Molecular Phenotypes: Transitioning from Immunosuppression to Hyperinflammation</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Anticoagulation Strategies During ECMO: Current Challenges and Future Perspectives">
+                        <span class="tag-pill bg-emerald-50 text-emerald-600">Review</span>
+                        <h3 class="zh-title">体外膜肺氧合 (ECMO) 期间的抗凝策略：挑战与未来</h3>
+                        <span class="en-title">Anticoagulation Strategies During ECMO: Current Challenges and Future Perspectives</span>
+                    </div>
+                    <!-- 新增 5 篇 -->
+                    <div class="article-card p-5" data-en="Optimal PEEP Titration in Obese Patients with Acute Respiratory Failure: A Systematic Review">
+                        <span class="tag-pill bg-emerald-50 text-emerald-600">Review</span>
+                        <h3 class="zh-title">肥胖合并急性呼吸衰竭患者的最佳 PEEP 滴定：系统评价</h3>
+                        <span class="en-title">Optimal PEEP Titration in Obese Patients with Acute Respiratory Failure: A Systematic Review</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Renal Replacement Therapy Initiation in Acute Kidney Injury: Final Report of the STARRT-AKI Follow-up">
+                        <span class="tag-pill bg-yellow-50 text-yellow-700">RCT</span>
+                        <h3 class="zh-title">急性肾损伤 RRT 启动时机：STARRT-AKI 长期随访终报</h3>
+                        <span class="en-title">Renal Replacement Therapy Initiation in Acute Kidney Injury: Final Report of the STARRT-AKI Follow-up</span>
+                    </div>
+                    <div class="article-card p-5" data-en="2026 International Consensus on the Management of Post-Cardiac Arrest Syndrome">
+                        <span class="tag-pill bg-purple-50 text-purple-600">Consensus</span>
+                        <h3 class="zh-title">2026 心脏骤停后综合征管理国际共识</h3>
+                        <span class="en-title">2026 International Consensus on the Management of Post-Cardiac Arrest Syndrome</span>
+                    </div>
+                    <div class="article-card p-5" data-en="The Role of POCUS in Differentiating Acute Undifferentiated Shock in the Emergency Department">
+                        <span class="tag-pill bg-yellow-50 text-yellow-700">Study</span>
+                        <h3 class="zh-title">POCUS 在急诊科鉴别急性未分化休克中的作用研究</h3>
+                        <span class="en-title">The Role of POCUS in Differentiating Acute Undifferentiated Shock in the Emergency Department</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Targeted Temperature Management After Out-of-Hospital Cardiac Arrest: A 2026 Meta-Analysis">
+                        <span class="tag-pill bg-emerald-50 text-emerald-600">Meta-Analysis</span>
+                        <h3 class="zh-title">院外心脏骤停后的目标温度管理：2026 最新荟萃分析</h3>
+                        <span class="en-title">Targeted Temperature Management After Out-of-Hospital Cardiac Arrest: A 2026 Meta-Analysis</span>
+                    </div>
+                </div>
+
+                <!-- 第二列 (16-30) -->
+                <div class="divide-y divide-slate-50">
+                    <div class="article-card p-5" data-en="Identification and Emergency Care Pathway for Adult Anaphylaxis in the ER 2026">
+                        <span class="tag-pill bg-blue-50 text-blue-600">Guideline</span>
+                        <h3 class="zh-title">2026 急诊科成人严重过敏反应识别与急救路径</h3>
+                        <span class="en-title">Identification and Emergency Care Pathway for Adult Anaphylaxis in the ER 2026</span>
+                    </div>
+                    <div class="article-card p-5" data-en="The PROTECT Trial: Value of Prophylactic Lung-Protective Ventilation in Non-Pulmonary Surgery">
+                        <span class="tag-pill bg-yellow-50 text-yellow-700">RCT</span>
+                        <h3 class="zh-title">PROTECT 试验：预防性肺保护通气在非肺部手术中的应用价值</h3>
+                        <span class="en-title">The PROTECT Trial: Value of Prophylactic Lung-Protective Ventilation in Non-Pulmonary Surgery</span>
+                    </div>
+                    <div class="article-card p-5" data-en="New Perspectives on Metabolic Remodeling and Nutritional Support in Critically Ill Patients">
+                        <span class="tag-pill bg-emerald-50 text-emerald-600">Review</span>
+                        <h3 class="zh-title">危重症患者代谢重塑与营养支持的新视角</h3>
+                        <span class="en-title">New Perspectives on Metabolic Remodeling and Nutritional Support in Critically Ill Patients</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Lessons from Misdiagnosis: Emergency Management of Atypical PE Complicated by Aortic Dissection">
+                        <span class="tag-pill bg-orange-50 text-orange-600">Case Report</span>
+                        <h3 class="zh-title">误诊后的反思：一例不典型肺栓塞合并主动脉夹层的危急救治</h3>
+                        <span class="en-title">Lessons from Misdiagnosis: Emergency Management of Atypical PE Complicated by Aortic Dissection</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Standardized Consensus on Multidisciplinary Collaboration for Early ICU Rehabilitation">
+                        <span class="tag-pill bg-purple-50 text-purple-600">Consensus</span>
+                        <h3 class="zh-title">重症康复早期干预：多学科协作模式的标准化共识</h3>
+                        <span class="en-title">Standardized Consensus on Multidisciplinary Collaboration for Early ICU Rehabilitation</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Recommendations for Titrated Organ Support in Geriatric Critically Ill Patients 2026">
+                        <span class="tag-pill bg-blue-50 text-blue-600">Guideline</span>
+                        <h3 class="zh-title">2026 高龄危重症患者器官支持滴定管理建议</h3>
+                        <span class="en-title">Recommendations for Titrated Organ Support in Geriatric Critically Ill Patients 2026</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Accuracy and Safety Analysis of LLMs in Supporting Clinical Decision Making in the ICU">
+                        <span class="tag-pill bg-yellow-50 text-yellow-700">Study</span>
+                        <h3 class="zh-title">大语言模型在 ICU 辅助临床决策中的准确性与安全性分析</h3>
+                        <span class="en-title">Accuracy and Safety Analysis of LLMs in Supporting Clinical Decision Making in the ICU</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Current Status of Biomarker Screening for Sepsis-Induced Cardiac Injury (SICI)">
+                        <span class="tag-pill bg-emerald-50 text-emerald-600">Review</span>
+                        <h3 class="zh-title">重症相关性心肌损伤 (SICI) 的生物标志物筛选现状</h3>
+                        <span class="en-title">Current Status of Biomarker Screening for Sepsis-Induced Cardiac Injury (SICI)</span>
+                    </div>
+                    <div class="article-card p-5" data-en="2026 Guidelines for Liver Failure Support and Artificial Liver Therapy in Critical Care">
+                        <span class="tag-pill bg-blue-50 text-blue-600">Guideline</span>
+                        <h3 class="zh-title">2026版 肝衰竭重症支持与人工肝治疗指南</h3>
+                        <span class="en-title">2026 Guidelines for Liver Failure Support and Artificial Liver Therapy in Critical Care</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Long-term Mental Health and PTSD Follow-up in ICU Survivors (PICS Review)">
+                        <span class="tag-pill bg-emerald-50 text-emerald-600">Review</span>
+                        <h3 class="zh-title">重症患者心理健康与 PICS 长期随访综述</h3>
+                        <span class="en-title">Long-term Mental Health and PTSD Follow-up in ICU Survivors (PICS Review)</span>
+                    </div>
+                    <!-- 新增 5 篇 -->
+                    <div class="article-card p-5" data-en="Adjunctive Vitamin C Therapy in Septic Shock: The LOVIT-II Randomized Clinical Trial">
+                        <span class="tag-pill bg-yellow-50 text-yellow-700">RCT</span>
+                        <h3 class="zh-title">脓毒性休克的维生素C辅助治疗：LOVIT-II 临床试验结果</h3>
+                        <span class="en-title">Adjunctive Vitamin C Therapy in Septic Shock: The LOVIT-II Randomized Clinical Trial</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Non-invasive Ventilation vs. High-Flow Nasal Oxygen for Post-extubation Respiratory Support">
+                        <span class="tag-pill bg-yellow-50 text-yellow-700">Study</span>
+                        <h3 class="zh-title">拔管后呼吸支持：无创通气与经鼻高流量氧疗的对比研究</h3>
+                        <span class="en-title">Non-invasive Ventilation vs. High-Flow Nasal Oxygen for Post-extubation Respiratory Support</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Gut Microbiota Dysbiosis and Its Impact on Immune Recovery in Critically Ill Patients">
+                        <span class="tag-pill bg-emerald-50 text-emerald-600">Review</span>
+                        <h3 class="zh-title">肠道菌群失调及其对危重症患者免疫恢复的影响</h3>
+                        <span class="en-title">Gut Microbiota Dysbiosis and Its Impact on Immune Recovery in Critically Ill Patients</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Extracorporeal Carbon Dioxide Removal (ECCO2R) in Hypercapnic Respiratory Failure: 2026 Clinical Update">
+                        <span class="tag-pill bg-emerald-50 text-emerald-600">Review</span>
+                        <h3 class="zh-title">高碳酸血症呼吸衰竭中的体外二氧化碳清除 (ECCO2R)：2026 临床进展</h3>
+                        <span class="en-title">Extracorporeal Carbon Dioxide Removal (ECCO2R) in Hypercapnic Respiratory Failure: 2026 Clinical Update</span>
+                    </div>
+                    <div class="article-card p-5" data-en="Management of Antithrombotic Therapy in Patients with Intracranial Hemorrhage: A 2026 Multi-Society Guideline">
+                        <span class="tag-pill bg-blue-50 text-blue-600">Guideline</span>
+                        <h3 class="zh-title">2026 多学会指南：脑出血患者的抗栓药物管理建议</h3>
+                        <span class="en-title">Management of Antithrombotic Therapy in Patients with Intracranial Hemorrhage: A 2026 Multi-Society Guideline</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="mt-10 text-center text-slate-400 pb-10">
+            <p class="text-[10px] uppercase tracking-widest font-bold">Medical Literature Intelligence Dashboard &copy; 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        // 初始化所有文献卡片的事件
+        function initArticleInteractions() {
+            const cards = document.querySelectorAll('.article-card');
+            const toast = document.getElementById('toast');
+
+            cards.forEach(card => {
+                const enTitle = card.getAttribute('data-en');
+
+                // 1. 左键点击：打开 Google 搜索
+                card.addEventListener('click', (e) => {
+                    // e.button === 0 表示鼠标左键
+                    if (e.button !== 0) return;
+                    
+                    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(enTitle)}`;
+                    window.open(searchUrl, '_blank');
+                });
+
+                // 2. 右键点击：执行复制操作并弹出提示
+                card.addEventListener('contextmenu', (e) => {
+                    e.preventDefault(); // 阻止浏览器原生右键菜单
+                    
+                    // 使用临时 textarea 进行复制（兼容性最好）
+                    const el = document.createElement('textarea');
+                    el.value = enTitle;
+                    document.body.appendChild(el);
+                    el.select();
+                    
+                    try {
+                        document.execCommand('copy');
+                        showToast("已成功复制英文标题到剪贴板");
+                    } catch (err) {
+                        showToast("复制失败");
+                    }
+                    
+                    document.body.removeChild(el);
+                });
+            });
+
+            function showToast(msg) {
+                toast.innerText = msg;
+                toast.style.opacity = '1';
+                toast.style.bottom = '40px';
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.bottom = '30px';
+                }, 2500);
+            }
+        }
+
+        // 页面加载完成后初始化
+        window.onload = initArticleInteractions;
+    </script>
+</body>
+</html>
