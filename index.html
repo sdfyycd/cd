@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>肺栓塞智能决策平台 | 决策支持 & 虚拟仿真</title>
+    <title>个人导航站 | 自助增减链接 · 简洁版</title>
     <style>
         * {
             margin: 0;
@@ -12,206 +12,595 @@
         }
 
         body {
-            background: linear-gradient(145deg, #eef2f9 0%, #dce5f0 100%);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(145deg, #f0f4fa 0%, #e2e8f0 100%);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 2rem 1.5rem;
             min-height: 100vh;
+        }
+
+        /* 主容器 */
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(2px);
+            border-radius: 2rem;
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            padding: 1.8rem 2rem 2rem;
+            transition: all 0.2s;
+        }
+
+        /* 头部 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e9edf2;
+            padding-bottom: 1rem;
+        }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1f3b4c, #2c6e9e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .toolbar {
+            display: flex;
+            gap: 12px;
+        }
+        .btn {
+            background: white;
+            border: 1px solid #cbdde9;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f5e7e;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .btn-primary {
+            background: #2c6e9e;
+            border-color: #2c6e9e;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1f557a;
+            transform: translateY(-1px);
+        }
+        .btn-outline:hover {
+            background: #eef3fc;
+            border-color: #9bb7d0;
+        }
+
+        /* 统计摘要 */
+        .stats {
+            background: #eef3fa;
+            padding: 0.6rem 1.2rem;
+            border-radius: 60px;
+            display: inline-block;
+            font-size: 0.8rem;
+            margin-bottom: 1.5rem;
+            color: #2c5a74;
+        }
+
+        /* 卡片网格 */
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.2rem;
+            margin: 1rem 0 2rem;
+        }
+        .link-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            transition: all 0.2s ease;
+            border: 1px solid #eef2f8;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            position: relative;
+            cursor: pointer;
+        }
+        .link-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.1);
+            border-color: #cbdde9;
+        }
+        /* 图标区：纯文字/简约符号 */
+        .favicon {
+            width: 44px;
+            height: 44px;
+            background: #f0f4fa;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
-        }
-
-        /* 主容器 - 高端医疗科技风格 */
-        .portal-container {
-            max-width: 1300px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(2px);
-            border-radius: 56px;
-            box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255,255,255,0.5);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        /* 头部形象区 */
-        .hero-section {
-            background: linear-gradient(135deg, #0b2b3f 0%, #123e56 100%);
-            padding: 2rem 2.5rem 1.8rem;
-            text-align: center;
-            color: white;
-        }
-        .badge-icon {
-            display: inline-block;
-            background: #2c7da0aa;
-            backdrop-filter: blur(4px);
-            padding: 0.3rem 1.2rem;
-            border-radius: 40px;
-            font-size: 0.75rem;
+            font-size: 1.4rem;
             font-weight: 600;
-            letter-spacing: 1px;
-            margin-bottom: 1rem;
-            border: 1px solid rgba(255,255,255,0.2);
+            color: #2c6e9e;
+            flex-shrink: 0;
+            font-family: monospace;
         }
-        .hero-section h1 {
-            font-size: 2.5rem;
+        .link-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        .link-title {
             font-weight: 700;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.3px;
-        }
-        .hero-section p {
             font-size: 1rem;
-            opacity: 0.85;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* 双卡片按钮区域 */
-        .systems-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2rem;
-            padding: 3rem 2.5rem 3.5rem;
-            justify-content: center;
-            align-items: stretch;
-        }
-
-        .system-card {
-            flex: 1;
-            min-width: 280px;
-            background: #ffffff;
-            border-radius: 32px;
-            box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.12);
-            transition: transform 0.2s ease, box-shadow 0.2s;
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
+            color: #1f3b4c;
+            margin-bottom: 4px;
+            white-space: nowrap;
             overflow: hidden;
-            border: 1px solid #eef3fc;
+            text-overflow: ellipsis;
         }
-        .system-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 28px 36px -16px rgba(0, 0, 0, 0.2);
-            border-color: #bdd9f0;
+        .link-url {
+            font-size: 0.7rem;
+            color: #7a8f9e;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-
-        .card-header {
-            padding: 1.6rem 1.8rem 1rem;
-            background: #fefefe;
-            border-bottom: 2px solid #eef2f8;
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0.6;
+            transition: 0.1s;
         }
-        .card-icon {
-            font-size: 2.6rem;
-            margin-bottom: 0.8rem;
+        .link-card:hover .card-actions {
+            opacity: 1;
         }
-        .card-title {
-            font-size: 1.65rem;
-            font-weight: 700;
-            color: #0a2f44;
-            letter-spacing: -0.2px;
-        }
-        .card-sub {
-            font-size: 0.8rem;
-            color: #5a7b9c;
-            margin-top: 6px;
-        }
-        .card-body {
-            padding: 1rem 1.8rem 1.4rem;
-            flex: 1;
-            color: #2c4c6e;
-            font-size: 0.9rem;
-            line-height: 1.45;
-        }
-        .card-footer-btn {
-            margin: 0.5rem 1.8rem 1.8rem;
-            background: #f0f7fe;
-            padding: 0.8rem;
-            text-align: center;
-            border-radius: 60px;
+        .action-icon {
+            background: none;
+            border: none;
+            font-size: 1rem;
             font-weight: 600;
-            color: #1f6392;
-            transition: 0.2s;
-            border: 1px solid #d7e5f5;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 30px;
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #5c6f87;
         }
-        .system-card:hover .card-footer-btn {
-            background: #1f6392;
-            color: white;
-            border-color: #1f6392;
+        .action-icon:hover {
+            background: #f1f5f9;
+            color: #1f3b4c;
+        }
+        .delete-icon:hover {
+            color: #d1453b;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: #fbfefe;
+            border-radius: 2rem;
+            color: #9aaebf;
+            grid-column: 1 / -1;
         }
 
-        /* 分割装饰 */
-        .info-footer {
-            background: #f8fafd;
-            padding: 1.2rem;
+        /* 模态框 (添加/编辑) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-card {
+            background: white;
+            max-width: 480px;
+            width: 90%;
+            border-radius: 2rem;
+            padding: 1.8rem;
+            box-shadow: 0 30px 40px rgba(0,0,0,0.2);
+        }
+        .modal-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+            color: #1f3b4c;
+        }
+        .input-group {
+            margin-bottom: 1.2rem;
+        }
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #406e8e;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 60px;
+            border: 1px solid #cbdbe0;
+            font-size: 0.9rem;
+            outline: none;
+            transition: 0.2s;
+        }
+        .input-group input:focus {
+            border-color: #2c6e9e;
+            box-shadow: 0 0 0 2px rgba(44,110,158,0.2);
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 1.5rem;
+        }
+        .btn-modal {
+            padding: 8px 20px;
+            border-radius: 40px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn-cancel {
+            background: #f0f2f5;
+        }
+        .btn-save {
+            background: #2c6e9e;
+            color: white;
+        }
+
+        /* 底部 */
+        .footer-bar {
+            margin-top: 1.5rem;
             text-align: center;
             font-size: 0.7rem;
-            color: #6c86a3;
-            border-top: 1px solid #e2eaf2;
-            letter-spacing: 0.3px;
+            color: #95aec9;
+            border-top: 1px solid #e3eaf1;
+            padding-top: 1.2rem;
         }
 
-        @media (max-width: 780px) {
-            .hero-section h1 { font-size: 1.8rem; }
-            .systems-grid { padding: 2rem 1.5rem; gap: 1.2rem; }
-            .card-title { font-size: 1.4rem; }
-        }
-
-        /* 医学点缀 */
-        .dot-pattern {
-            background-image: radial-gradient(#ffffff20 1.2px, transparent 1.2px);
-            background-size: 24px 24px;
+        @media (max-width: 640px) {
+            .nav-container { padding: 1rem; }
+            .header { flex-direction: column; align-items: stretch; }
+            .toolbar { justify-content: flex-start; }
         }
     </style>
 </head>
 <body>
-<div class="portal-container">
-    <div class="hero-section">
-        <div class="badge-icon">🏥 国家肺血管病中心 · 智能诊疗平台</div>
-        <h1>肺栓塞综合管理门户</h1>
-        <p>基于2025中国指南 | 临床决策支持 + 交互式虚拟仿真训练</p>
+<div class="nav-container">
+    <div class="header">
+        <h1>📌 我的导航 · 自管理云门户</h1>
+        <div class="toolbar">
+            <button class="btn btn-outline" id="exportBtn">导出备份</button>
+            <button class="btn btn-primary" id="addLinkBtn">+ 添加链接</button>
+        </div>
     </div>
+    <div class="stats" id="statsDisplay">✨ 0 个站点 · 随时增删</div>
 
-    <div class="systems-grid">
-        <!-- 按钮1: 肺栓塞决策支持系统 链接 pe1.html -->
-        <a href="pe1.html" class="system-card" target="_self" rel="noopener noreferrer">
-            <div class="card-header">
-                <div class="card-icon">🧠📊</div>
-                <div class="card-title">肺栓塞决策支持系统</div>
-                <div class="card-sub">Clinical Decision Support · 指南驱动</div>
-            </div>
-            <div class="card-body">
-                基于2025急性肺栓塞指南构建的智能风险评估、危险分层、抗凝/溶栓推荐及CTEPH随访。辅助医师快速制定个体化方案。
-            </div>
-            <div class="card-footer-btn">
-                🔗 进入决策系统 →
-            </div>
-        </a>
-
-        <!-- 按钮2: 肺栓塞虚拟仿真系统 链接 pe2.html -->
-        <a href="pe2.html" class="system-card" target="_self" rel="noopener noreferrer">
-            <div class="card-header">
-                <div class="card-icon">🩺🖥️</div>
-                <div class="card-title">肺栓塞虚拟仿真系统</div>
-                <div class="card-sub">Virtual Simulation · 沉浸式教学</div>
-            </div>
-            <div class="card-body">
-                高仿真临床情景模拟：急性肺栓塞急救流程、介入操作模拟、危重症鉴别及PERT多学科协作训练。提升实战能力。
-            </div>
-            <div class="card-footer-btn">
-                🎮 启动仿真训练 →
-            </div>
-        </a>
+    <div class="links-grid" id="linksGrid">
+        <!-- 卡片动态渲染 -->
+        <div class="empty-state">暂无链接，点击“添加链接”开始创建你的导航吧</div>
     </div>
-    <div class="info-footer">
-        ⚕️ 本系统遵循《急性肺栓塞诊断和治疗指南2025》 | 数据安全加密 | 仅供医疗专业人士使用
+    <div class="footer-bar">
+        自助管理：点击卡片上的 编辑 | 删除 | 数据自动保存至浏览器本地存储
     </div>
 </div>
 
-<!-- 增加简单的路由提示：若pe1或pe2未创建时友好提醒（但正常情况用户会自行放置文件，不报错即可） -->
+<!-- 模态框 增/改 -->
+<div id="linkModal" class="modal">
+    <div class="modal-card">
+        <h3 id="modalTitle">+ 添加新链接</h3>
+        <div class="input-group">
+            <label>标题</label>
+            <input type="text" id="linkTitle" placeholder="例如：医学文献检索" autocomplete="off">
+        </div>
+        <div class="input-group">
+            <label>网址（URL）</label>
+            <input type="url" id="linkUrl" placeholder="https:// 或 http://" autocomplete="off">
+        </div>
+        <div class="input-group">
+            <label>图标 (短文本/字母/符号)</label>
+            <input type="text" id="linkIcon" placeholder="web / doc / lib" value="link" autocomplete="off">
+        </div>
+        <div class="modal-buttons">
+            <button class="btn-modal btn-cancel" id="cancelModalBtn">取消</button>
+            <button class="btn-modal btn-save" id="saveLinkBtn">保存</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // 优雅处理可能缺文件的情况: 在控制台提示不影响使用，点击时浏览器默认导航。
-    // 无需过度干扰，为了让用户明白目标文件需存在，但本页只负责链接跳转
-    console.log("肺栓塞门户已加载 — 请确保 pe1.html 和 pe2.html 与当前页面在同一目录下");
+    // ---------- 导航链接数据管理 (无 emoji 版本，图标为纯文本) ----------
+    const STORAGE_KEY = 'personal_nav_links_v2_clean';
+    let links = [];         // 存储 { id, title, url, icon }
+    let editMode = false;
+    let editingId = null;
+
+    // DOM 元素
+    const gridContainer = document.getElementById('linksGrid');
+    const statsSpan = document.getElementById('statsDisplay');
+    const addBtn = document.getElementById('addLinkBtn');
+    const modal = document.getElementById('linkModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const linkTitleInput = document.getElementById('linkTitle');
+    const linkUrlInput = document.getElementById('linkUrl');
+    const linkIconInput = document.getElementById('linkIcon');
+    const saveBtn = document.getElementById('saveLinkBtn');
+    const cancelBtn = document.getElementById('cancelModalBtn');
+    const exportBtn = document.getElementById('exportBtn');
+
+    // 加载本地存储数据
+    function loadLinks() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            try {
+                links = JSON.parse(stored);
+                if (!Array.isArray(links)) links = [];
+            } catch(e) { links = []; }
+        }
+        if (!links.length) {
+            // 提供几个示例导航（无表情图标，使用文字标识）
+            links = [
+                { id: Date.now() + 1, title: 'PubMed 医学文献', url: 'https://pubmed.ncbi.nlm.nih.gov/', icon: 'pubmed' },
+                { id: Date.now() + 2, title: '中华心血管病杂志', url: 'https://cjcv.org.cn/', icon: 'journal' },
+                { id: Date.now() + 3, title: 'GitHub 代码库', url: 'https://github.com/', icon: 'git' },
+                { id: Date.now() + 4, title: '微信公众平台', url: 'https://mp.weixin.qq.com/', icon: 'wechat' }
+            ];
+            saveToLocal();
+        }
+        renderGrid();
+    }
+
+    function saveToLocal() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+        updateStats();
+    }
+
+    function updateStats() {
+        if (statsSpan) {
+            const count = links.length;
+            statsSpan.innerHTML = `共 ${count} 个导航链接 · 支持增删改 | 数据存储于本地`;
+        }
+    }
+
+    // 辅助防XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // 渲染网格
+    function renderGrid() {
+        if (!gridContainer) return;
+        if (links.length === 0) {
+            gridContainer.innerHTML = `<div class="empty-state">暂无链接，点击“添加链接”开始搭建你的专属导航吧</div>`;
+            return;
+        }
+        let html = '';
+        links.forEach(link => {
+            const displayIcon = link.icon && link.icon.trim() !== '' ? link.icon.substring(0, 2) : '🔗';
+            let displayUrl = link.url.length > 45 ? link.url.substring(0, 45) + '...' : link.url;
+            html += `
+                <div class="link-card" data-id="${link.id}">
+                    <div class="favicon">${escapeHtml(displayIcon)}</div>
+                    <div class="link-info">
+                        <div class="link-title">${escapeHtml(link.title)}</div>
+                        <div class="link-url">${escapeHtml(displayUrl)}</div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="action-icon edit-link" data-id="${link.id}" title="编辑">✎</button>
+                        <button class="action-icon delete-link" data-id="${link.id}" title="删除">✖</button>
+                    </div>
+                </div>
+            `;
+        });
+        gridContainer.innerHTML = html;
+        // 绑定编辑删除事件
+        document.querySelectorAll('.edit-link').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = parseInt(btn.getAttribute('data-id'));
+                openEditModal(id);
+            });
+        });
+        document.querySelectorAll('.delete-link').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = parseInt(btn.getAttribute('data-id'));
+                deleteLinkById(id);
+            });
+        });
+        // 卡片整体点击跳转（除了按钮区）
+        document.querySelectorAll('.link-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.classList.contains('action-icon') || 
+                    e.target.classList.contains('edit-link') || 
+                    e.target.classList.contains('delete-link') ||
+                    e.target.closest('.card-actions')) {
+                    return;
+                }
+                const id = parseInt(card.getAttribute('data-id'));
+                const targetLink = links.find(l => l.id === id);
+                if (targetLink && targetLink.url) {
+                    let url = targetLink.url.trim();
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        url = 'https://' + url;
+                    }
+                    window.open(url, '_blank', 'noopener noreferrer');
+                }
+            });
+        });
+    }
+
+    function openAddModal() {
+        editMode = false;
+        editingId = null;
+        modalTitle.innerText = '+ 添加新链接';
+        linkTitleInput.value = '';
+        linkUrlInput.value = '';
+        linkIconInput.value = 'link';
+        modal.style.display = 'flex';
+    }
+
+    function openEditModal(id) {
+        const link = links.find(l => l.id === id);
+        if (!link) return;
+        editMode = true;
+        editingId = id;
+        modalTitle.innerText = '✎ 编辑链接';
+        linkTitleInput.value = link.title;
+        linkUrlInput.value = link.url;
+        linkIconInput.value = link.icon || 'link';
+        modal.style.display = 'flex';
+    }
+
+    function saveLink() {
+        let title = linkTitleInput.value.trim();
+        let url = linkUrlInput.value.trim();
+        let icon = linkIconInput.value.trim();
+        if (!title) {
+            alert('请填写标题');
+            return;
+        }
+        if (!url) {
+            alert('请填写网址');
+            return;
+        }
+        if (!icon) icon = 'web';
+        // 补充协议
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+        if (editMode && editingId !== null) {
+            const index = links.findIndex(l => l.id === editingId);
+            if (index !== -1) {
+                links[index] = { ...links[index], title, url, icon };
+            }
+        } else {
+            const newId = Date.now();
+            links.push({ id: newId, title, url, icon });
+        }
+        saveToLocal();
+        renderGrid();
+        closeModal();
+    }
+
+    function deleteLinkById(id) {
+        if (confirm('确定要删除这个导航链接吗？')) {
+            links = links.filter(l => l.id !== id);
+            saveToLocal();
+            renderGrid();
+        }
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+        editMode = false;
+        editingId = null;
+        linkTitleInput.value = '';
+        linkUrlInput.value = '';
+        linkIconInput.value = '';
+    }
+
+    function exportData() {
+        const dataStr = JSON.stringify(links, null, 2);
+        const blob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `nav_links_backup_${new Date().toISOString().slice(0,19)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        alert('导出成功，保存为 JSON 备份文件。');
+    }
+
+    // 导入备份（添加额外功能）
+    function addImportButton() {
+        const importFileInput = document.createElement('input');
+        importFileInput.type = 'file';
+        importFileInput.accept = 'application/json';
+        importFileInput.style.display = 'none';
+        importFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const imported = JSON.parse(ev.target.result);
+                    if (Array.isArray(imported)) {
+                        links = imported;
+                        saveToLocal();
+                        renderGrid();
+                        alert(`导入成功! 共 ${links.length} 个链接。`);
+                    } else {
+                        alert('文件格式错误，需要数组结构');
+                    }
+                } catch (err) {
+                    alert('解析失败，请确保是有效的导航备份JSON');
+                }
+                importFileInput.value = '';
+            };
+            reader.readAsText(file);
+        });
+        document.body.appendChild(importFileInput);
+        const importBtn = document.createElement('button');
+        importBtn.className = 'btn btn-outline';
+        importBtn.innerText = '导入备份';
+        importBtn.style.marginLeft = '8px';
+        importBtn.addEventListener('click', () => {
+            importFileInput.click();
+        });
+        const toolbar = document.querySelector('.toolbar');
+        if (toolbar && !document.querySelector('.import-btn-added')) {
+            importBtn.classList.add('import-btn-added');
+            toolbar.appendChild(importBtn);
+        }
+    }
+
+    function bindEvents() {
+        addBtn.addEventListener('click', openAddModal);
+        saveBtn.addEventListener('click', saveLink);
+        cancelBtn.addEventListener('click', closeModal);
+        exportBtn.addEventListener('click', exportData);
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.style.display === 'flex') {
+                closeModal();
+            }
+        });
+    }
+
+    function init() {
+        loadLinks();
+        bindEvents();
+        addImportButton();
+        updateStats();
+    }
+
+    init();
 </script>
 </body>
 </html>
