@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>可拖拽+搜索 · 个人导航站 | 自助增删链接</title>
+    <title>可置顶导航 · 完整标题提示 | 拖拽/搜索/最多置顶10个</title>
     <style>
         * {
             margin: 0;
@@ -158,6 +158,11 @@
             cursor: grab;
             user-select: none;
         }
+        .link-card.pinned-card {
+            background: #fffef7;
+            border-left: 5px solid #f5a623;
+            box-shadow: 0 4px 12px rgba(245,166,35,0.12);
+        }
         .link-card:active {
             cursor: grabbing;
         }
@@ -183,11 +188,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: #2c6e9e;
             flex-shrink: 0;
             font-family: monospace;
+            text-transform: uppercase;
         }
         .link-info {
             flex: 1;
@@ -201,6 +207,19 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .pin-badge {
+            background: #f5a62320;
+            color: #c46b1a;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.6rem;
+            border-radius: 30px;
+            font-weight: 600;
+            white-space: nowrap;
         }
         .link-url {
             font-size: 0.7rem;
@@ -236,6 +255,12 @@
         .action-icon:hover {
             background: #f1f5f9;
             color: #1f3b4c;
+        }
+        .pin-icon {
+            color: #f5a623;
+        }
+        .pin-icon:hover {
+            color: #e08e1a;
         }
         .delete-icon:hover {
             color: #d1453b;
@@ -340,14 +365,13 @@
 <body>
 <div class="nav-container">
     <div class="header">
-        <h1>📌 我的导航 · 拖拽排序 + 搜索</h1>
+        <h1>📌 我的导航</h1>
         <div class="toolbar">
             <button class="btn btn-outline" id="exportBtn">导出备份</button>
             <button class="btn btn-primary" id="addLinkBtn">+ 添加链接</button>
         </div>
     </div>
     
-    <!-- 搜索栏 -->
     <div class="search-section">
         <div class="search-box">
             <input type="text" id="searchInput" placeholder="🔍 根据标题快速筛选..." autocomplete="off">
@@ -361,7 +385,7 @@
         <div class="empty-state">暂无链接，点击“添加链接”开始创建你的导航吧</div>
     </div>
     <div class="footer-bar">
-        💡 自助管理：拖拽卡片调整顺序 | 点击 ✎ 编辑 | 🗑️ 删除 | 支持标题实时搜索 | 自动保存至本地
+        💡 自助管理：拖拽调整顺序 | 点击 ⭐ 置顶/取消置顶 (最多10个) | ✎ 编辑 | 🗑️ 删除 | 鼠标悬停显示完整标题/网址 | 自动保存
     </div>
 </div>
 
@@ -377,10 +401,6 @@
             <label>网址（URL）</label>
             <input type="url" id="linkUrl" placeholder="https:// 或 http://" autocomplete="off">
         </div>
-        <div class="input-group">
-            <label>图标 (短文本/字母)</label>
-            <input type="text" id="linkIcon" placeholder="web / doc / lib" value="link" autocomplete="off">
-        </div>
         <div class="modal-buttons">
             <button class="btn-modal btn-cancel" id="cancelModalBtn">取消</button>
             <button class="btn-modal btn-save" id="saveLinkBtn">保存</button>
@@ -389,12 +409,13 @@
 </div>
 
 <script>
-    // ---------- 可拖拽排序 + 标题搜索 + 增删改查 ----------
-    const STORAGE_KEY = 'nav_draggable_search_v4';
-    let links = [];            // { id, title, url, icon }
+    // ========== 置顶功能：最多10个，支持拖拽排序时保持置顶优先，鼠标悬停显示完整标题/地址 ==========
+    const STORAGE_KEY = 'nav_pin_tooltip_v7';
+    let links = [];            // 每个元素 { id, title, url, pinned }
     let editMode = false;
     let editingId = null;
-    let currentSearchKeyword = '';   // 当前搜索关键词（高亮用）
+    let currentSearchKeyword = '';
+    let dragSrcIndex = null;
 
     // DOM
     const gridContainer = document.getElementById('linksGrid');
@@ -404,7 +425,6 @@
     const modalTitle = document.getElementById('modalTitle');
     const linkTitleInput = document.getElementById('linkTitle');
     const linkUrlInput = document.getElementById('linkUrl');
-    const linkIconInput = document.getElementById('linkIcon');
     const saveBtn = document.getElementById('saveLinkBtn');
     const cancelBtn = document.getElementById('cancelModalBtn');
     const exportBtn = document.getElementById('exportBtn');
@@ -412,37 +432,18 @@
     const searchBtn = document.getElementById('searchBtn');
     const clearSearchBtn = document.getElementById('clearSearchBtn');
 
-    let dragSrcIndex = null;
-
-    // 加载数据
-    function loadLinks() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            try {
-                links = JSON.parse(stored);
-                if (!Array.isArray(links)) links = [];
-            } catch(e) { links = []; }
-        }
-        if (!links.length) {
-            links = [
-                { id: Date.now() + 101, title: 'PubMed 医学文献', url: 'https://pubmed.ncbi.nlm.nih.gov/', icon: 'pub' },
-                { id: Date.now() + 102, title: '中华心血管病杂志', url: 'https://cjcv.org.cn/', icon: 'jou' },
-                { id: Date.now() + 103, title: 'GitHub 代码库', url: 'https://github.com/', icon: 'git' },
-                { id: Date.now() + 104, title: '微信公众平台', url: 'https://mp.weixin.qq.com/', icon: 'wx' }
-            ];
-            saveToLocal();
-        }
-        renderGridWithSearch();
+    // 辅助函数：获取排序后的列表（置顶优先）
+    function reorderLinksByPin() {
+        const pinned = links.filter(l => l.pinned);
+        const normal = links.filter(l => !l.pinned);
+        links = [...pinned, ...normal];
     }
 
-    function saveToLocal() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
-        updateStats();
-    }
-
-    function updateStats() {
-        const total = links.length;
-        statsSpan.innerHTML = `📋 共 ${total} 个导航 | 拖拽排序 | 支持标题搜索`;
+    function getInitial(title) {
+        if (!title) return 'L';
+        const first = title.trim().charAt(0).toUpperCase();
+        if (/[A-Za-z0-9\u4e00-\u9fa5]/.test(first)) return first;
+        return '⚡';
     }
 
     function escapeHtml(str) {
@@ -452,12 +453,9 @@
             if (m === '<') return '&lt;';
             if (m === '>') return '&gt;';
             return m;
-        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-            return c;
         });
     }
 
-    // 高亮标题
     function highlightTitle(title, keyword) {
         if (!keyword || keyword.trim() === '') return escapeHtml(title);
         const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -465,55 +463,101 @@
         return escapeHtml(title).replace(regex, `<span class="search-highlight">$1</span>`);
     }
 
-    // 获取过滤后的links（不改变原始顺序）
-    function getFilteredLinks() {
+    function getFilteredIndices() {
         const kw = currentSearchKeyword.trim().toLowerCase();
-        if (!kw) return [...links];
-        return links.filter(link => link.title.toLowerCase().includes(kw));
+        if (!kw) return links.map((_, idx) => idx);
+        return links.reduce((arr, link, idx) => {
+            if (link.title.toLowerCase().includes(kw)) arr.push(idx);
+            return arr;
+        }, []);
     }
 
-    // 渲染带高亮 和 拖拽属性（整体渲染，保持拖拽可用）
-    function renderGridWithSearch() {
-        if (!gridContainer) return;
-        const filtered = getFilteredLinks();
-        if (filtered.length === 0) {
-            gridContainer.innerHTML = `<div class="empty-state">🔍 没有找到与“${escapeHtml(currentSearchKeyword)}”相关的链接，试试其他关键词吧</div>`;
+    function saveToLocalAndReorder() {
+        reorderLinksByPin();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+        updateStats();
+    }
+
+    function saveToLocal() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+        updateStats();
+    }
+
+    function updateStats() {
+        const pinnedCount = links.filter(l => l.pinned).length;
+        statsSpan.innerHTML = `📋 共 ${links.length} 个导航 | 置顶 ${pinnedCount}/10 | 拖拽排序 | 支持搜索`;
+        if (currentSearchKeyword.trim() !== '') {
+            const filteredCount = getFilteredIndices().length;
+            statsSpan.innerHTML = `📋 共 ${links.length} 个导航 | 置顶 ${pinnedCount}/10 | 筛选结果: ${filteredCount} 个匹配 “${escapeHtml(currentSearchKeyword)}”`;
+        }
+    }
+
+    function togglePin(id) {
+        const link = links.find(l => l.id === id);
+        if (!link) return;
+        const currentPinnedCount = links.filter(l => l.pinned).length;
+        if (!link.pinned && currentPinnedCount >= 10) {
+            alert(`置顶数量已达上限 (10个)，请先取消其他链接的置顶后再试。`);
             return;
         }
-        let html = '';
-        // 遍历过滤后的列表，但为了保证拖拽时操作的是原始 links 索引，我们需要存储原始id；拖拽依然基于原始数组。
-        // 关键：拖拽重排依赖于 data-index（原始links数组中的索引）。因此需要基于原始links渲染，但隐藏不匹配的卡片。
-        // 这样拖拽依然能够正确交换原始顺序，同时符合搜索筛选的视觉。
-        // 优化：渲染全部原始links，但不符合搜索条件的设置隐藏 display:none，这样拖拽时不会影响隐藏卡片但依旧保留原始顺序索引。
-        // 但是在grid里面隐藏卡片会产生空隙，更好的方式采用css order? 为了简单且拖拽排序正确，采用显示/隐藏方式，再利用辅助样式。
-        // 保证拖拽只在可见卡片间进行，并且拖拽结束后重新整理links时也会考虑所有卡片。
-        // 实现方案：渲染全部links，对不符合搜索条件的添加 style="display: none;"，符合的显示。由于隐藏卡片依然占据data-index，
-        // 用户只能拖动可见卡片，拖拽事件依然基于索引位置，但由于隐藏卡片的存在，可能会错位。
-        // 为了更好的体验, 重新实现：在拖拽时如果当前处于搜索状态，先清空搜索再进行拖拽排序? 但那样体验不好。
-        // 更稳健: 如果当前有搜索关键词，提示用户清空筛选后再拖拽，或者拖拽时自动清空搜索？暂时采用拖拽前若有筛选，自动清空搜索并提示。
-        // 但为了功能平滑，选择在拖拽开始时若搜索激活，则自动清除筛选并重新渲染，让拖拽在完整列表中进行。这是最友好的交互。
-        // 以下实现该逻辑。
-        if (currentSearchKeyword.trim() !== '') {
-            // 临时禁用拖拽时的自动清空？其实为了保证拖拽排序逻辑不混乱，在dragstart检测并清空搜索比较合理。
-            // 渲染逻辑仍需完整渲染，但使用filter函数高亮显示。
-            // 此处采用受控渲染: 由于links会整体保存，我们在dragstart做清空搜索。
+        link.pinned = !link.pinned;
+        saveToLocalAndReorder();
+        renderGridWithSearch();
+    }
+
+    function loadLinks() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            try {
+                links = JSON.parse(stored);
+                if (!Array.isArray(links)) links = [];
+                links.forEach(link => { if (link.pinned === undefined) link.pinned = false; });
+            } catch(e) { links = []; }
         }
-        // 渲染所有links, 但根据搜索关键词决定是否显示和高亮
+        if (!links.length) {
+            links = [
+                { id: Date.now() + 101, title: 'PubMed 医学文献数据库 (生物医学文献检索)', url: 'https://pubmed.ncbi.nlm.nih.gov/', pinned: true },
+                { id: Date.now() + 102, title: '中华心血管病杂志官网', url: 'https://cjcv.org.cn/', pinned: false },
+                { id: Date.now() + 103, title: 'GitHub 全球代码托管平台', url: 'https://github.com/', pinned: false },
+                { id: Date.now() + 104, title: '微信公众平台官方后台', url: 'https://mp.weixin.qq.com/', pinned: false }
+            ];
+            saveToLocalAndReorder();
+        }
+        reorderLinksByPin();
+        renderGridWithSearch();
+    }
+
+    // 核心渲染，并为每个卡片增加 title 属性（鼠标悬停显示完整标题+网址）
+    function renderGridWithSearch() {
+        if (!gridContainer) return;
+        if (links.length === 0) {
+            gridContainer.innerHTML = `<div class="empty-state">✨ 暂无链接，点击“添加链接”开始创建你的导航吧</div>`;
+            return;
+        }
+        const filteredIndices = getFilteredIndices();
         let allHtml = '';
         links.forEach((link, idx) => {
-            const shouldShow = currentSearchKeyword.trim() === '' || link.title.toLowerCase().includes(currentSearchKeyword.toLowerCase());
+            const shouldShow = filteredIndices.includes(idx);
             const displayStyle = shouldShow ? '' : 'style="display: none;"';
-            const displayIcon = link.icon && link.icon.trim() !== '' ? link.icon.substring(0, 2) : 'li';
+            const displayIcon = getInitial(link.title);
             let displayUrl = link.url.length > 45 ? link.url.substring(0, 45) + '...' : link.url;
             const highlightedTitle = highlightTitle(link.title, currentSearchKeyword);
+            const pinnedClass = link.pinned ? 'pinned-card' : '';
+            const pinBadgeHtml = link.pinned ? `<span class="pin-badge">⭐ 置顶</span>` : '';
+            // 构建完整的 tooltip 文本：原始标题 + 完整网址
+            const tooltipText = `${link.title}\n${link.url}`;
             allHtml += `
-                <div class="link-card" data-id="${link.id}" data-index="${idx}" draggable="true" ${displayStyle}>
+                <div class="link-card ${pinnedClass}" data-id="${link.id}" data-index="${idx}" draggable="true" ${displayStyle} title="${escapeHtml(tooltipText)}">
                     <div class="favicon">${escapeHtml(displayIcon)}</div>
                     <div class="link-info">
-                        <div class="link-title">${highlightedTitle}</div>
+                        <div class="link-title">
+                            ${highlightedTitle}
+                            ${pinBadgeHtml}
+                        </div>
                         <div class="link-url">${escapeHtml(displayUrl)}</div>
                     </div>
                     <div class="card-actions">
+                        <button class="action-icon pin-link" data-id="${link.id}" title="${link.pinned ? '取消置顶' : '置顶 (最多10个)'}">⭐</button>
                         <button class="action-icon edit-link" data-id="${link.id}" title="编辑">✎</button>
                         <button class="action-icon delete-link" data-id="${link.id}" title="删除">🗑️</button>
                     </div>
@@ -522,7 +566,14 @@
         });
         gridContainer.innerHTML = allHtml;
 
-        // 绑定编辑删除
+        // 绑定事件
+        document.querySelectorAll('.pin-link').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = parseInt(btn.getAttribute('data-id'));
+                togglePin(id);
+            });
+        });
         document.querySelectorAll('.edit-link').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -537,11 +588,11 @@
                 deleteLinkById(id);
             });
         });
-
-        // 卡片点击跳转
         document.querySelectorAll('.link-card').forEach(card => {
+            // 点击打开链接（避开按钮区域）
             card.addEventListener('click', (e) => {
                 if (e.target.classList.contains('action-icon') ||
+                    e.target.classList.contains('pin-link') ||
                     e.target.classList.contains('edit-link') ||
                     e.target.classList.contains('delete-link') ||
                     e.target.closest('.card-actions')) {
@@ -551,17 +602,16 @@
                 const targetLink = links.find(l => l.id === id);
                 if (targetLink && targetLink.url) {
                     let url = targetLink.url.trim();
-                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                        url = 'https://' + url;
-                    }
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
                     window.open(url, '_blank', 'noopener noreferrer');
                 }
             });
         });
         attachDragEvents();
+        updateStats();
     }
 
-    // 拖拽逻辑增强: 如果有激活搜索，先清空搜索再开始拖拽避免索引错位
+    // 拖拽逻辑（置顶与置顶交换，普通与普通交换）
     function attachDragEvents() {
         const cards = document.querySelectorAll('.link-card');
         cards.forEach(card => {
@@ -582,7 +632,6 @@
     }
 
     function handleDragStart(e) {
-        // 如果当前有搜索关键词，自动清空搜索并刷新，然后重新触发拖拽（终止本次，因为dom重建）
         if (currentSearchKeyword.trim() !== '') {
             e.preventDefault();
             alert('拖拽排序前请先清空筛选条件 (点击“清空筛选”)');
@@ -591,11 +640,11 @@
         const card = e.target.closest('.link-card');
         if (!card) return;
         dragSrcIndex = parseInt(card.getAttribute('data-index'));
+        if (isNaN(dragSrcIndex)) return;
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', dragSrcIndex);
         card.classList.add('dragging');
     }
-
     function handleDragOver(e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
@@ -623,10 +672,17 @@
             cleanDragStyles();
             return;
         }
+        const srcPinned = links[dragSrcIndex].pinned;
+        const targetPinned = links[targetIndex].pinned;
+        if (srcPinned !== targetPinned) {
+            alert('置顶链接只能与置顶链接交换顺序，非置顶同理。如需改变置顶状态请使用⭐按钮。');
+            cleanDragStyles();
+            return;
+        }
         const [movedItem] = links.splice(dragSrcIndex, 1);
         links.splice(targetIndex, 0, movedItem);
-        saveToLocal();
-        renderGridWithSearch();   // 重新渲染保留搜索状态（此时搜索关键词为空）
+        saveToLocalAndReorder();
+        renderGridWithSearch();
         cleanDragStyles();
     }
     function handleDragEnd(e) {
@@ -639,30 +695,22 @@
         });
     }
 
-    // 搜索逻辑
     function performSearch() {
         currentSearchKeyword = searchInput.value.trim();
         renderGridWithSearch();
-        updateStats();
-        if (currentSearchKeyword !== '') {
-            statsSpan.innerHTML += ` 🔍 筛选: "${escapeHtml(currentSearchKeyword)}"`;
-        }
     }
     function clearSearch() {
         searchInput.value = '';
         currentSearchKeyword = '';
         renderGridWithSearch();
-        updateStats();
     }
 
-    // 增删改
     function openAddModal() {
         editMode = false;
         editingId = null;
         modalTitle.innerText = '+ 添加新链接';
         linkTitleInput.value = '';
         linkUrlInput.value = '';
-        linkIconInput.value = 'link';
         modal.style.display = 'flex';
     }
     function openEditModal(id) {
@@ -673,31 +721,28 @@
         modalTitle.innerText = '✎ 编辑链接';
         linkTitleInput.value = link.title;
         linkUrlInput.value = link.url;
-        linkIconInput.value = link.icon || 'link';
         modal.style.display = 'flex';
     }
     function saveLink() {
         let title = linkTitleInput.value.trim();
         let url = linkUrlInput.value.trim();
-        let icon = linkIconInput.value.trim();
         if (!title) { alert('请填写标题'); return; }
         if (!url) { alert('请填写网址'); return; }
-        if (!icon) icon = 'web';
         if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
         if (editMode && editingId !== null) {
             const idx = links.findIndex(l => l.id === editingId);
-            if (idx !== -1) links[idx] = { ...links[idx], title, url, icon };
+            if (idx !== -1) { links[idx].title = title; links[idx].url = url; }
         } else {
-            links.push({ id: Date.now(), title, url, icon });
+            links.push({ id: Date.now(), title, url, pinned: false });
         }
-        saveToLocal();
+        saveToLocalAndReorder();
         renderGridWithSearch();
         closeModal();
     }
     function deleteLinkById(id) {
         if (confirm('确定要删除这个导航链接吗？')) {
             links = links.filter(l => l.id !== id);
-            saveToLocal();
+            saveToLocalAndReorder();
             renderGridWithSearch();
         }
     }
@@ -712,7 +757,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `nav_search_backup_${new Date().toISOString().slice(0,19)}.json`;
+        a.download = `nav_pin_backup_${new Date().toISOString().slice(0,19)}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -732,8 +777,9 @@
                 try {
                     const imported = JSON.parse(ev.target.result);
                     if (Array.isArray(imported)) {
+                        imported.forEach(link => { if (link.pinned === undefined) link.pinned = false; });
                         links = imported;
-                        saveToLocal();
+                        saveToLocalAndReorder();
                         clearSearch();
                         alert(`导入成功! 共 ${links.length} 个链接。`);
                     } else alert('文件格式错误');
@@ -771,7 +817,6 @@
         loadLinks();
         bindEvents();
         addImportButton();
-        updateStats();
     }
     init();
 </script>
